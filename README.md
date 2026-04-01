@@ -34,8 +34,8 @@ Everyone on your team should add their name along with a link to their GitHub
 your repo access and to practice PR'ing with your team *before* you start
 coding!
 
-- Ndzana Christophe #1: [GitHub](https://github.com/christoban)
-- Teammate name #2: [GitHub](https://github.com/ghaccountname) / [LinkedIn](https://linkedin.com/in/liaccountname)
-
+- Alex Thomas (Scrum Master) [GitHub](https://github.com/BagelTime) / [LinkedIn](https://linkedin.com/in/ajt11176)
+- Sobebar Ali: [GitHub](https://github.com/sobebarali) / [LinkedIn](https://www.linkedin.com/in/sobebarali/)
+- Tomislav Dukez: [GitHub](https://github.com/tomdu3) / [Linkedin](https://www.linkedin.com/in/tomislav-dukez)
+- Ndzana Christophe: [GitHub](https://github.com/christoban) / [LinkedIn](https://linkedin.com/in/christophe-ndzana)
    ...
-- Teammate name #n: [GitHub](https://github.com/ghaccountname) / [LinkedIn](https://linkedin.com/in/liaccountname)
