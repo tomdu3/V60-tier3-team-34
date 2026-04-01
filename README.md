@@ -38,4 +38,4 @@ coding!
 - Sobebar Ali: [GitHub](https://github.com/sobebarali) / [LinkedIn](https://www.linkedin.com/in/sobebarali/)
 - Tomislav Dukez: [GitHub](https://github.com/tomdu3) / [Linkedin](https://www.linkedin.com/in/tomislav-dukez)
    ...
-- Teammate name #n: [GitHub](https://github.com/ghaccountname) / [LinkedIn](https://linkedin.com/in/liaccountname)
+- Ndzana Christophe: [GitHub](https://github.com/christoban) / [LinkedIn](https://linkedin.com/in/liaccountname)
