@@ -40,3 +40,4 @@ coding!
 - Ndzana Christophe: [GitHub](https://github.com/christoban) / [LinkedIn](https://linkedin.com/in/christophe-ndzana)
 - Srikaanth Balajhi: [GitHub](https://github.com/srikaanthtb) / [LinkedIn](https://www.linkedin.com/in/srikaanth-balajhi-4b6171131/)
 - Conrado Figari Vechio (Product Owner) [GitHub](https://github.com/conradofigariv) / [LinkedIn](https://www.linkedin.com/in/conradofigarivechio/)
+- John Omokhagbon Ezekiel: [GitHub](https://github.com/Siriusa1616) / [Linkedin](https://www.linkedin.com/in/john-ezekiel-dev/)
