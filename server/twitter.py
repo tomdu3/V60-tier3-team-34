@@ -1,7 +1,9 @@
+import os
 from playwright.async_api import async_playwright
 from typing import List, Dict
-
-async def scrape_tweet(limit: int = 20, max_scroll_attempts: int = 30) -> List[Dict[str, str]]:
+# limit is the number of tweets to scrape
+# max_scroll_attempts is the maximum number of times to scroll
+async def scrape_tweet(username: str, password: str, limit: int = 20, max_scroll_attempts: int = 30) -> List[Dict[str, str]]:
     playwright = await async_playwright().start()
     try:
         device = playwright.devices["Desktop Chrome"]
@@ -9,6 +11,25 @@ async def scrape_tweet(limit: int = 20, max_scroll_attempts: int = 30) -> List[D
         try:
             context = await browser.new_context(**device)
             page = await context.new_page()
+            
+            # Login to X first
+            await page.goto("https://x.com/i/flow/login")
+            
+            await page.wait_for_selector('input[autocomplete="username"]')
+            await page.fill('input[autocomplete="username"]', username)
+            await page.keyboard.press("Enter")
+
+            await page.wait_for_selector('input[name="password"]')
+            await page.fill('input[name="password"]', password)
+            await page.keyboard.press("Enter")
+
+            # Wait for home page to load or a short timeout
+            try:
+                await page.wait_for_selector('[aria-label="Account menu"]', timeout=10000)
+            except Exception:
+                print("Login might be facing extra verification or already proceeded.")
+
+            # Navigate to target profile
             await page.goto("https://x.com/jimcramer")
             await page.wait_for_selector('[aria-label="Timeline: Jim Cramer’s posts"]')
 
@@ -38,5 +59,12 @@ if __name__ == "__main__":
     import asyncio
     import json
 
-    tweets = asyncio.run(scrape_tweet(20))
+    username = os.environ.get("TWITTER_USERNAME", "")
+    password = os.environ.get("TWITTER_PASSWORD", "")
+    
+    if not username or not password:
+        print("Please set TWITTER_USERNAME and TWITTER_PASSWORD environment variables.")
+        exit(1)
+
+    tweets = asyncio.run(scrape_tweet(username, password, 20))
     print(json.dumps(tweets, ensure_ascii=False, indent=2))
