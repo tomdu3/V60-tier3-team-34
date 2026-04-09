@@ -26,8 +26,7 @@ async def scrape_tweet(limit: int = 20) -> List[Dict[str, str]]:
             for i in range(n):
                 t = tweets_locator.nth(i)
                 text = await t.inner_text()
-                html = await t.inner_html()
-                results.append({"text": text, "html": html})
+                results.append({"text": text})
 
             return results
         finally:
