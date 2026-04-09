@@ -58,6 +58,10 @@ async def scrape_tweet(username: str, password: str, limit: int = 20, max_scroll
 if __name__ == "__main__":
     import asyncio
     import json
+    from dotenv import load_dotenv
+
+    # Load environment variables from .env file if present
+    load_dotenv()
 
     username = os.environ.get("TWITTER_USERNAME", "")
     password = os.environ.get("TWITTER_PASSWORD", "")
