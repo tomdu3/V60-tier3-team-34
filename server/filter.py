@@ -18,16 +18,6 @@
 # - Fixed deduplication to use normalized text for comparison
 # - URL-only tweet filtering (https://t.co links)
 # - Emoji-only / no real word content filtering
-#
-# TESTING:
-# - Verified using sample edge-case dataset
-# - Handles common noisy tweet patterns
-#
-# IMPORTANT NOTES:
-# - This is not a final production-locked version
-# - It is designed for extension and team iteration
-# - Additional edge cases can be safely added
-# =========================
 
 import re
 from typing import List, Dict
@@ -102,5 +92,7 @@ def filter_tweets(tweets: List[Tweet]) -> List[Tweet]:
 
         seen.add(normalized)
         filtered.append(tweet)
+    # Order tweets by timestamp
+    filtered.sort(key=lambda x: x["timestamp"], reverse=True)
 
     return filtered
