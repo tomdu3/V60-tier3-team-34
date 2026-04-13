@@ -18,7 +18,7 @@ you like the best.
 | 6 | What work tracking tool do we use? | [GitHub Projects](https://github.com/orgs/chingu-voyages/projects/384) |
 | 7 | Def of Ready - DOR | No outstanding questions, Estimated, broken into task (if necessary) |
 | 8 | Def of Done - DOD | Approved by PO, merged to Dev branch, avalible on test site |
-| 9 | Where do the points live | Points are on the story only |
+| 9 | Where do the points live | Points are on the tasks if they exist, otherwise they are on the story |
 | 10 | When / Where do we deploy code | Deploy  to test site for PO to approve as soon as it is approved. The goal is to deploy to main at the end of each sprint |
 | 11 | What project are we doing? | After a LONG discussion we decided on the CramerBot project |
 | 12| What tech stack are we using | FASTAPI - backend <br> Superbase - DB Storage <br> HTMX + CSS + TailwindCSS + ChartJS - Frontened |
