@@ -1,6 +1,7 @@
 import asyncio
 import json
 import argparse
+import os
 from datetime import datetime
 from typing import List, Dict, Optional
 from playwright.async_api import async_playwright, Page, Browser
@@ -9,6 +10,8 @@ from bs4 import BeautifulSoup
 import random
 import re
 import urllib.parse
+from dotenv import load_dotenv
+from supabase import create_client, Client
 
 
 class TwitterScraper:
@@ -750,6 +753,41 @@ class TwitterScraper:
         pd.DataFrame(tweets).to_csv(csv_file, index=False, encoding='utf-8')
         print(f"\n✓ Tweets saved to:\n  - {json_file}\n  - {csv_file}")
 
+    def save_to_supabase(self, tweets: List[Dict]) -> int:
+        """Save tweets to Supabase database with deduplication"""
+        if not supabase:
+            print("Warning: Supabase client not initialized. Skipping database save.")
+            return 0
+        
+        if not tweets:
+            print("No tweets to save to Supabase.")
+            return 0
+        
+        saved_count = 0
+        for tweet in tweets:
+            try:
+                # Prepare data for Supabase
+                tweet_data = {
+                    'text': tweet.get('text', ''),
+                    'timestamp': tweet.get('timestamp'),
+                    'url': tweet.get('url', '')
+                }
+                
+                # Use upsert to handle duplicates (url is unique)
+                result = supabase.table('tweets').upsert(
+                    tweet_data,
+                    on_conflict='url'
+                ).execute()
+                
+                saved_count += 1
+                print(f"✓ Saved tweet to Supabase: {tweet_data['text'][:50]}...")
+                
+            except Exception as e:
+                print(f"✗ Error saving tweet to Supabase: {e}")
+                continue
+        
+        print(f"\n✓ Total tweets saved to Supabase: {saved_count}/{len(tweets)}")
+        return saved_count
 
 async def main():
     parser = argparse.ArgumentParser(description='Scrape tweets from Twitter/X account')
@@ -802,6 +840,9 @@ async def main():
             target = f"@{args.username}" if args.username else "batch"
             print(f"\n✓ Successfully scraped {len(tweets)} tweets for {target}")
             print(f"\nSample tweet:\n  Time: {tweets[0]['timestamp']}\n  Text: {tweets[0]['text'][:100]}...")
+            
+            # Save to Supabase if configured
+            scraper.save_to_supabase(tweets)
         else:
             target = f"@{args.username}" if args.username else "batch input"
             print(f"\n✗ No tweets found for {target}")

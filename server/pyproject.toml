@@ -11,5 +11,6 @@ dependencies = [
     "playwright>=1.58.0",
     "python-dotenv>=1.2.2",
     "sqlalchemy>=2.0.49",
+    "supabase>=2.10.0",
     "uvicorn>=0.44.0",
 ]
