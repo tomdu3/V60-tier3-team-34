@@ -15,4 +15,5 @@ dependencies = [
     "uvicorn>=0.44.0",
 ]
 
-py_modules = ["main", "twitter"]
+[tool.setuptools]
+py-modules = ["main", "twitter"]
