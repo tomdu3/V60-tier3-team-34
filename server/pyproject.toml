@@ -16,4 +16,4 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["main", "twitter"]
+py_modules = ["main", "twitter"]
