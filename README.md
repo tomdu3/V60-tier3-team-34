@@ -42,3 +42,14 @@ coding!
 - Conrado Figari Vechio (Product Owner) [GitHub](https://github.com/conradofigariv) / [LinkedIn](https://www.linkedin.com/in/conradofigarivechio/)
 - Peter Kabamba [GitHub](https://github.com/pietrols) / [LinkedIn](https://linkedin.com/in/peter-kabamba-959a061b9)
 - John Omokhagbon Ezekiel: [GitHub](https://github.com/Sirius1616) / [Linkedin](https://www.linkedin.com/in/john-ezekiel-dev/)
+
+## Database Schema
+
+We use PostgreSQL (via Docker Compose) and SQLAlchemy/Alembic for data persistence. The database schema stores scraped tweets and user account data.
+
+![Database Entity Relationship Diagram](./docs/ERD-Reverse_cramer.png)
+
+- **`tweets`**: Stores historical tweet data scraped from X. Used to track data and prevent duplicate processing via the `tweet_timestamp`.
+- **`user_settings`**: Stores user authentication and profile data.
+
+*For more details on setting up the local database, running migrations, and API endpoints, see the [Database Implementation Plan](./docs/db_implementation_plan.md).*
