@@ -1,0 +1,134 @@
+[
+  {
+    "username": "mockuser",
+    "text": "RT @someone This is a retweet and should be filtered out.",
+    "timestamp": "Apr 17, 2026 · 10:00 AM UTC",
+    "url": "https://x.com/mockuser/status/1",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:00:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "I really like this retweet",
+    "timestamp": "Apr 17, 2026 · 10:05 AM UTC",
+    "url": "https://x.com/mockuser/status/2",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:05:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "@anotheruser Hello there! This is a reply.",
+    "timestamp": "Apr 17, 2026 · 10:10 AM UTC",
+    "url": "https://x.com/mockuser/status/3",
+    "is_reply": true,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:10:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "Replying to @user yes I agree",
+    "timestamp": "Apr 17, 2026 · 10:15 AM UTC",
+    "url": "https://x.com/mockuser/status/4",
+    "is_reply": true,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:15:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "    ",
+    "timestamp": "Apr 17, 2026 · 10:20 AM UTC",
+    "url": "https://x.com/mockuser/status/5",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:20:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "🔥🔥🔥",
+    "timestamp": "Apr 17, 2026 · 10:25 AM UTC",
+    "url": "https://x.com/mockuser/status/6",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:25:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "https://t.co/abc123xyz",
+    "timestamp": "Apr 17, 2026 · 10:30 AM UTC",
+    "url": "https://x.com/mockuser/status/7",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:30:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "http://example.com/some/link",
+    "timestamp": "Apr 17, 2026 · 10:35 AM UTC",
+    "url": "https://x.com/mockuser/status/8",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:35:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "@justmentions @only",
+    "timestamp": "Apr 17, 2026 · 10:40 AM UTC",
+    "url": "https://x.com/mockuser/status/9",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:40:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "This is a valid tweet that should NOT be filtered out.",
+    "timestamp": "Apr 17, 2026 · 10:45 AM UTC",
+    "url": "https://x.com/mockuser/status/10",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:45:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "THIS is a VALID tweet that should NOT be filtered out.",
+    "timestamp": "Apr 17, 2026 · 10:50 AM UTC",
+    "url": "https://x.com/mockuser/status/11",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:50:00.000000"
+  },
+  {
+    "username": "mockuser",
+    "text": "Another perfectly fine tweet for testing.",
+    "timestamp": "Apr 17, 2026 · 10:55 AM UTC",
+    "url": "https://x.com/mockuser/status/12",
+    "is_reply": false,
+    "replies": 0,
+    "retweets": 0,
+    "likes": 0,
+    "scraped_at": "2026-04-17T10:55:00.000000"
+  }
+]
