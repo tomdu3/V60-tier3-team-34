@@ -122,3 +122,19 @@ If you want to view how the filter behaves on a specific JSON file *without* ins
 ```bash
 uv run run_filter.py data/your_scraped_tweets.json
 ```
+
+### API Endpoint Testing (`test_api.py`)
+To test your local FastAPI endpoints directly without needing a web browser or Postman, use the `test_api.py` script. It uses `httpx.ASGITransport` to securely query the `/tweets` and `/users` endpoints locally.
+```bash
+uv run python test_api.py
+```
+
+### Interactive API Testing (Swagger UI)
+Alternatively, since we use FastAPI, you can test the endpoints interactively through the built-in Swagger UI in your browser.
+First, start the development server:
+```bash
+uv run fastapi dev main.py
+```
+Then, open your web browser and navigate to:
+[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+From there, you can view the schema, click "Try it out", and execute API calls directly from the interface.
