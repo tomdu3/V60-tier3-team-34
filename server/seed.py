@@ -19,7 +19,11 @@ async def seed_db():
         avatar_url="https://example.com/seed.png",
         password_hash="hashed_password_123",
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
+        risk_per_trade=0.02,
+        max_positions=10,
+        max_daily_trades=5,
+        min_ai_confidence=0.75
     )
 
     mock_tweets = [
@@ -49,7 +53,11 @@ async def seed_db():
                 password_hash=mock_user.password_hash,
                 avatar_url=mock_user.avatar_url,
                 created_at=mock_user.created_at,
-                updated_at=mock_user.updated_at
+                updated_at=mock_user.updated_at,
+                risk_per_trade=mock_user.risk_per_trade,
+                max_positions=mock_user.max_positions,
+                max_daily_trades=mock_user.max_daily_trades,
+                min_ai_confidence=mock_user.min_ai_confidence
             )
             # On conflict (unique email/username), just update the login time or ignore
             stmt_user = stmt_user.on_conflict_do_nothing(index_elements=['email'])

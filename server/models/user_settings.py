@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, DateTime
+from sqlalchemy import String, DateTime, Float, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -24,3 +24,7 @@ class UserSettings(Base):
         onupdate=lambda: datetime.now(timezone.utc)
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    risk_per_trade: Mapped[float | None] = mapped_column(Float, nullable=True)
+    max_positions: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    max_daily_trades: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    min_ai_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)

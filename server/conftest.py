@@ -33,7 +33,11 @@ def mock_user_settings_data():
         "last_login_at": None,
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc),
-        "deleted_at": None
+        "deleted_at": None,
+        "risk_per_trade": 0.02,
+        "max_positions": 10,
+        "max_daily_trades": 5,
+        "min_ai_confidence": 0.75
     }
 
 @pytest.fixture
