@@ -14,3 +14,6 @@ dependencies = [
     "supabase>=2.10.0",
     "uvicorn>=0.44.0",
 ]
+
+[tool.setuptools]
+py-modules = ["main", "twitter"]
