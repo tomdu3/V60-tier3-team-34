@@ -103,6 +103,15 @@ async def import_tweets(json_file: str):
             
             print(f"Successfully analyzed {len(valid_results)} tweets with Claude API")
             
+            # Print sentiment analysis results for testing
+            print("\n=== Sentiment Analysis Results ===")
+            for result in valid_results:
+                print(f"\nTimestamp: {result['tweet_timestamp']}")
+                print(f"Sentiment: {result['sentiment']}")
+                print(f"Confidence Score: {result['confidence_score']}")
+                print(f"Stock Tickers: {result['stock_tickers']}")
+            print("=== End of Analysis Results ===\n")
+            
             # 4. Insert sentiment analysis results
             print("Inserting sentiment analysis results into database...")
             for result in valid_results:
