@@ -51,6 +51,42 @@ async def get_tweets(limit: int = Query(default=5, ge=1, le=100)):
         tweets = result.scalars().all()
         return [{col.name: getattr(t, col.name) for col in t.__table__.columns} for t in tweets]
 
+@app.get("/api/account-equity")
+async def account_equity(days: int = Query(default=30, ge=30, le=90)):
+    """
+    Returns mock portfolio equity data over time.
+    In production, this will fetch from Alpaca API.
+    """
+    from datetime import datetime, timedelta
+    import math
+    
+    # Mock data: simulate equity growth over the requested period
+    data = []
+    start_date = datetime.now() - timedelta(days=days)
+    current_equity = 100000  # Starting equity
+    
+    for i in range(days):
+        date = start_date + timedelta(days=i)
+        # Simulate realistic daily changes (-2% to +3%)
+        daily_change = current_equity * (0.01 * math.sin(i / 10) + 0.002)
+        current_equity += daily_change
+        data.append({
+            "date": date.strftime("%Y-%m-%d"),
+            "equity": round(current_equity, 2)
+        })
+    
+    total_change = data[-1]["equity"] - data[0]["equity"]
+    percent_change = (total_change / data[0]["equity"]) * 100
+    
+    return {
+        "equity_history": data,
+        "current_equity": round(current_equity, 2),
+        "total_change": round(total_change, 2),
+        "percent_change": round(percent_change, 2),
+        "days": days
+    }
+
+
 @app.get("/users")
 async def get_users(limit: int = Query(default=5, ge=1, le=100)):
     async with async_session_maker() as session:
