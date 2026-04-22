@@ -46,15 +46,15 @@
 
     <div class="flex h-[calc(100vh-57px)] overflow-hidden">
 
-        <aside class="w-64 flex-shrink-0 border-r border-gray-800 overflow-y-auto bg-[#111]"
-               id="signal-feed"
-               hx-get="/api/signal-feed"
-               hx-trigger="load"
-               hx-swap="innerHTML">
-            <div class="px-4 py-8 text-center text-gray-600 text-sm">
-                Cargando señales...
-            </div>
-        </aside>
+<aside class="w-64 flex-shrink-0 border-r border-gray-800 overflow-y-auto bg-[#111]" id="signal-feed">
+    <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-800 sticky top-0 bg-[#111]">
+        <span class="text-sm font-semibold text-gray-300">Live Signal Feed</span>
+    </div>
+    <div id="tweets-container" class="divide-y divide-gray-800">
+        <div class="px-4 py-8 text-center text-gray-600 text-sm">Cargando...</div>
+    </div>
+</aside>
+
 
         <main class="flex-1 overflow-y-auto p-6">
             <p class="text-gray-500 text-sm">Próximo paso: Stats Bar y Chart</p>
