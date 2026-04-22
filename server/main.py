@@ -26,9 +26,10 @@ async def signal_feed_partial(request: Request, limit: int = Query(default=20, g
         )
         tweets = result.scalars().all()
     return templates.TemplateResponse(
-        "components/signal_feed.html",
-        {"request": request, "tweets": tweets}
-    )
+        return templates.TemplateResponse(
+    "components/signal_feed.html",
+    context={"request": request, "tweets": tweets}
+)
 
 @app.get("/tweets")
 async def get_tweets(limit: int = Query(default=5, ge=1, le=100)):
