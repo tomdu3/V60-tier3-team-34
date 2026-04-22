@@ -47,14 +47,10 @@
 
         <!-- LEFT: Live Signal Feed -->
         <aside class="w-64 flex-shrink-0 border-r border-gray-800 overflow-y-auto bg-[#111]">
-
-            <!-- Header -->
             <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-800 sticky top-0 bg-[#111] z-10">
                 <i data-lucide="rss" class="w-4 h-4 text-green-400"></i>
                 <span class="text-sm font-semibold text-gray-300">Live Signal Feed</span>
             </div>
-
-            <!-- Filtro por tickers -->
             <div class="px-3 py-2 border-b border-gray-800 bg-[#111] sticky top-10 z-10">
                 <div class="flex gap-1">
                     <input
@@ -63,29 +59,38 @@
                         placeholder="AAPL, NVDA, MSFT..."
                         class="flex-1 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-green-500"
                     />
-                    <button
-                        onclick="loadFeed()"
-                        class="bg-green-600 hover:bg-green-500 text-white text-xs px-2 py-1 rounded transition">
+                    <button onclick="loadFeed()" class="bg-green-600 hover:bg-green-500 text-white text-xs px-2 py-1 rounded transition">
                         <i data-lucide="search" class="w-3 h-3"></i>
                     </button>
-                    <button
-                        onclick="clearFilter()"
-                        class="bg-gray-700 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded transition">
+                    <button onclick="clearFilter()" class="bg-gray-700 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded transition">
                         <i data-lucide="x" class="w-3 h-3"></i>
                     </button>
                 </div>
             </div>
-
-            <!-- Tweet list -->
             <div id="tweets-container" class="divide-y divide-gray-800">
                 <div class="px-4 py-8 text-center text-gray-600 text-sm">Cargando...</div>
             </div>
-
         </aside>
 
         <!-- CENTER -->
-        <main class="flex-1 overflow-y-auto p-6">
-            <p class="text-gray-500 text-sm">Próximo paso: Stats Bar y Chart</p>
+        <main class="flex-1 overflow-y-auto p-6 space-y-4">
+            <div class="bg-[#1a1a1a] rounded-lg border border-gray-800 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h2 class="text-base font-semibold text-white">Account Equity</h2>
+                        <div class="flex items-center gap-3 mt-1">
+                            <span id="current-equity" class="text-2xl font-bold text-white">--</span>
+                            <span id="equity-change" class="text-sm px-2 py-0.5 rounded-full"></span>
+                        </div>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="loadChart(30)" id="btn-30" class="chart-btn border-green-500 text-white px-3 py-1 text-xs rounded border border-gray-700 hover:border-green-500 transition">30D</button>
+                        <button onclick="loadChart(60)" id="btn-60" class="chart-btn px-3 py-1 text-xs rounded border border-gray-700 text-gray-300 hover:text-white hover:border-green-500 transition">60D</button>
+                        <button onclick="loadChart(90)" id="btn-90" class="chart-btn px-3 py-1 text-xs rounded border border-gray-700 text-gray-300 hover:text-white hover:border-green-500 transition">90D</button>
+                    </div>
+                </div>
+                <canvas id="equityChart" height="120"></canvas>
+            </div>
         </main>
 
         <!-- RIGHT -->
@@ -95,16 +100,16 @@
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         lucide.createIcons();
 
+        // Signal Feed
         function loadFeed() {
             const tickers = document.getElementById('ticker-input').value.trim();
             const url = tickers ? `/api/signal-feed?tickers=${encodeURIComponent(tickers)}` : '/api/signal-feed';
             const container = document.getElementById('tweets-container');
-
             container.innerHTML = '<div class="px-4 py-8 text-center text-gray-600 text-sm">Cargando...</div>';
-
             fetch(url)
                 .then(r => r.json())
                 .then(tweets => {
@@ -131,15 +136,78 @@
             loadFeed();
         }
 
-        // Cargar al inicio
+        document.getElementById('ticker-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') loadFeed();
+        });
+
         loadFeed();
 
-        // Filtrar al presionar Enter
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('ticker-input').addEventListener('keydown', e => {
-                if (e.key === 'Enter') loadFeed();
+        // Equity Chart
+        let chart = null;
+
+        function loadChart(days) {
+            document.querySelectorAll('.chart-btn').forEach(b => {
+                b.classList.remove('border-green-500', 'text-white');
+                b.classList.add('text-gray-300');
             });
-        });
+            document.getElementById(`btn-${days}`).classList.add('border-green-500', 'text-white');
+            document.getElementById(`btn-${days}`).classList.remove('text-gray-300');
+
+            fetch(`/api/account-equity?days=${days}`)
+                .then(r => r.json())
+                .then(data => {
+                    const isGain = data.total_change >= 0;
+                    const color = isGain ? '#22c55e' : '#ef4444';
+
+                    document.getElementById('current-equity').textContent =
+                        '$' + data.current_equity.toLocaleString('en-US', {minimumFractionDigits: 2});
+
+                    const changeEl = document.getElementById('equity-change');
+                    changeEl.textContent = `${isGain ? '+' : ''}$${data.total_change.toLocaleString('en-US', {minimumFractionDigits: 2})} (${isGain ? '+' : ''}${data.percent_change.toFixed(2)}%)`;
+                    changeEl.className = `text-sm px-2 py-0.5 rounded-full ${isGain ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`;
+
+                    const labels = data.equity_history.map(d => d.date);
+                    const values = data.equity_history.map(d => d.equity);
+
+                    if (chart) chart.destroy();
+
+                    chart = new Chart(document.getElementById('equityChart'), {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [{
+                                data: values,
+                                borderColor: color,
+                                backgroundColor: color + '20',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0,
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: {
+                                    ticks: { color: '#6b7280', maxTicksLimit: 6, font: { size: 10 } },
+                                    grid: { color: '#1f2937' }
+                                },
+                                y: {
+                                    ticks: {
+                                        color: '#6b7280',
+                                        font: { size: 10 },
+                                        callback: v => '$' + (v / 1000).toFixed(0) + 'k'
+                                    },
+                                    grid: { color: '#1f2937' }
+                                }
+                            }
+                        }
+                    });
+                });
+        }
+
+        loadChart(30);
     </script>
 </body>
 </html>
