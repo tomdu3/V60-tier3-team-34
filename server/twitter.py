@@ -779,19 +779,19 @@ class TwitterScraper:
             try:
                 # Prepare data for Supabase
                 tweet_data = {
-                    'text': tweet.get('text', ''),
-                    'timestamp': tweet.get('timestamp'),
-                    'url': tweet.get('url', '')
+                    'tweet_timestamp': tweet.get('timestamp'),
+                    'tweet_text': tweet.get('text', ''),
+                    'tweet_link': tweet.get('url', '')
                 }
                 
-                # Use upsert to handle duplicates (url is unique)
+                # Use upsert to handle duplicates (tweet_timestamp is unique)
                 result = self.supabase.table('tweets').upsert(
                     tweet_data,
-                    on_conflict='url'
+                    on_conflict='tweet_timestamp'
                 ).execute()
                 
                 saved_count += 1
-                print(f"✓ Saved tweet to Supabase: {tweet_data['text'][:50]}...")
+                print(f"✓ Saved tweet to Supabase: {tweet_data['tweet_text'][:50]}...")
                 
             except Exception as e:
                 print(f"✗ Error saving tweet to Supabase: {e}")
