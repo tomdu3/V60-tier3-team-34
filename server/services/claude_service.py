@@ -60,6 +60,18 @@ Return ONLY the JSON, no other text."""
             )
             
             response_text = message.content[0].text
+            print(f"Raw Claude API response: {repr(response_text)}")
+            
+            # Strip markdown code blocks if present
+            response_text = response_text.strip()
+            if response_text.startswith('```json'):
+                response_text = response_text[7:]  # Remove ```json
+            elif response_text.startswith('```'):
+                response_text = response_text[3:]  # Remove ```
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]  # Remove trailing ```
+            response_text = response_text.strip()
+            
             # Parse the JSON response
             result = json.loads(response_text)
             
