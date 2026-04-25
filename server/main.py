@@ -2,44 +2,92 @@ from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, or_
+from sqlalchemy.orm import Session
 from db.database import async_session_maker
 from models.tweet import Tweet
 from models.user_settings import UserSettings
 from pathlib import Path
+from datetime import datetime, timedelta
+import random
 
 app = FastAPI()
 
 BASE_DIR = Path(__file__).parent
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard():
+async def root():
     html_file = BASE_DIR / "templates" / "dashboard.html"
     return HTMLResponse(content=html_file.read_text())
 
 @app.get("/api/signal-feed")
-async def signal_feed_partial(
-    limit: int = Query(default=20, ge=1, le=100),
-    tickers: str = Query(default="")
-):
+async def get_signal_feed(limit: int = Query(default=20, ge=1, le=100), ticker: str = Query(default="")):
     async with async_session_maker() as session:
         query = select(Tweet).order_by(Tweet.created_at.desc()).limit(limit)
-
-        if tickers:
-            ticker_list = [t.strip().upper() for t in tickers.split(",") if t.strip()]
-            filters = [Tweet.tweet_text.ilike(f"%{ticker}%") for ticker in ticker_list]
-            query = query.where(or_(*filters))
-
+        if ticker:
+            tickers = [t.strip().upper() for t in ticker.split(",") if t.strip()]
+            if tickers:
+                query = select(Tweet).where(
+                    or_(*[Tweet.tweet_text.ilike(f"%${t}%") for t in tickers])
+                ).order_by(Tweet.created_at.desc()).limit(limit)
         result = await session.execute(query)
         tweets = result.scalars().all()
+        return [
+            {
+                "tweet_timestamp": t.tweet_timestamp,
+                "tweet_text": t.tweet_text,
+                "tweet_link": t.tweet_link,
+                "created_at": t.created_at.isoformat() if t.created_at else None,
+            }
+            for t in tweets
+        ]
 
+@app.get("/api/account-equity")
+async def get_account_equity(days: int = Query(default=30, ge=1, le=365)):
+    base_equity = 125000
+    labels = []
+    values = []
+    today = datetime.now()
+    for i in range(days, -1, -1):
+        date = today - timedelta(days=i)
+        labels.append(date.strftime("%b %d"))
+        change = random.uniform(-2000, 2500)
+        base_equity = max(base_equity + change, 90000)
+        values.append(round(base_equity, 2))
+    return {"labels": labels, "values": values}
+
+@app.get("/api/account-stats")
+async def get_account_stats():
+    return {
+        "total_equity": 127450.82,
+        "daily_pnl": 1823.45,
+        "daily_pnl_pct": 1.45,
+        "cash_balance": 34210.00,
+        "win_rate": 68.4,
+    }
+
+@app.get("/api/positions")
+async def get_positions():
     return [
-        {
-            "text": t.tweet_text,
-            "link": t.tweet_link,
-            "created_at": str(t.created_at)
-        }
-        for t in tweets
+        {"ticker": "AAPL", "shares": 50, "avg_price": 178.32, "market_price": 182.45, "pnl": 206.50, "pnl_pct": 2.31},
+        {"ticker": "NVDA", "shares": 20, "avg_price": 445.10, "market_price": 467.30, "pnl": 444.00, "pnl_pct": 4.99},
+        {"ticker": "MSFT", "shares": 30, "avg_price": 415.20, "market_price": 408.75, "pnl": -193.50, "pnl_pct": -1.55},
+    ]
+
+@app.post("/api/positions/close")
+async def close_position(data: dict):
+    ticker = data.get("ticker", "")
+    return {"success": True, "message": f"Position {ticker} closed successfully"}
+
+@app.get("/api/trade-history")
+async def get_trade_history():
+    return [
+        {"ticker": "AAPL", "side": "BUY", "status": "Filled", "qty": 50, "price": 178.32, "time": "2025-04-24 09:31"},
+        {"ticker": "NVDA", "side": "BUY", "status": "Filled", "qty": 20, "price": 445.10, "time": "2025-04-23 10:15"},
+        {"ticker": "TSLA", "side": "SELL", "status": "Filled", "qty": 15, "price": 248.90, "time": "2025-04-22 14:42"},
+        {"ticker": "MSFT", "side": "BUY", "status": "Filled", "qty": 30, "price": 415.20, "time": "2025-04-22 11:05"},
+        {"ticker": "META", "side": "SELL", "status": "Cancelled", "qty": 10, "price": 512.00, "time": "2025-04-21 13:20"},
+        {"ticker": "AMZN", "side": "BUY", "status": "Pending", "qty": 25, "price": 185.50, "time": "2025-04-25 09:00"},
     ]
 
 @app.get("/tweets")
@@ -51,88 +99,6 @@ async def get_tweets(limit: int = Query(default=5, ge=1, le=100)):
         tweets = result.scalars().all()
         return [{col.name: getattr(t, col.name) for col in t.__table__.columns} for t in tweets]
 
-@app.get("/api/account-equity")
-async def account_equity(days: int = Query(default=30, ge=30, le=90)):
-    """
-    Returns mock portfolio equity data over time.
-    In production, this will fetch from Alpaca API.
-    """
-    from datetime import datetime, timedelta
-    import math
-    
-    # Mock data: simulate equity growth over the requested period
-    data = []
-    start_date = datetime.now() - timedelta(days=days)
-    current_equity = 100000  # Starting equity
-    
-    for i in range(days):
-        date = start_date + timedelta(days=i)
-        # Simulate realistic daily changes (-2% to +3%)
-        daily_change = current_equity * (0.01 * math.sin(i / 10) + 0.002)
-        current_equity += daily_change
-        data.append({
-            "date": date.strftime("%Y-%m-%d"),
-            "equity": round(current_equity, 2)
-        })
-    
-    total_change = data[-1]["equity"] - data[0]["equity"]
-    percent_change = (total_change / data[0]["equity"]) * 100
-    
-    return {
-        "equity_history": data,
-        "current_equity": round(current_equity, 2),
-        "total_change": round(total_change, 2),
-        "percent_change": round(percent_change, 2),
-        "days": days
-    }
-
-@app.get("/api/positions")
-async def get_positions():
-    """
-    Returns mock open positions data.
-    In production, this will fetch from Alpaca API.
-    """
-    return {
-        "positions": [
-            {
-                "ticker": "AAPL",
-                "quantity": 50,
-                "avg_price": 170.25,
-                "current_price": 185.50,
-                "pnl": 760.25,
-                "pnl_percent": 8.98
-            },
-            {
-                "ticker": "NVDA",
-                "quantity": 25,
-                "avg_price": 875.00,
-                "current_price": 920.75,
-                "pnl": 1143.75,
-                "pnl_percent": 5.22
-            },
-            {
-                "ticker": "MSFT",
-                "quantity": 30,
-                "avg_price": 380.00,
-                "current_price": 415.20,
-                "pnl": 1056.00,
-                "pnl_percent": 9.26
-            }
-        ]
-    }
-
-@app.post("/api/positions/close")
-async def close_position(ticker: str = Query(...)):
-    """
-    Close a position (mock implementation).
-    In production, this calls Alpaca API to liquidate.
-    """
-    return {
-        "success": True,
-        "message": f"Position {ticker} closed successfully",
-        "ticker": ticker
-    }
-    
 @app.get("/users")
 async def get_users(limit: int = Query(default=5, ge=1, le=100)):
     async with async_session_maker() as session:
