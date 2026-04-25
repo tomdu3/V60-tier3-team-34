@@ -7,9 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script>
-    tailwind.config = { darkMode: 'class' }
-  </script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
   <style>
     body { background-color: #0f1117; color: #e2e8f0; font-family: 'Inter', sans-serif; }
     ::-webkit-scrollbar { width: 4px; }
@@ -24,6 +22,10 @@
     .badge-pending { background: #3b2a00; color: #fbbf24; }
     .badge-cancelled { background: #2d1515; color: #f87171; }
     .tab-active { border-bottom: 2px solid #60a5fa; color: #60a5fa; }
+    .mode-tab-active { background: #1e3a5f; color: #60a5fa; }
+    .mode-tab-inactive { background: #1a1d27; color: #6b7280; }
+    .toggle-on { background: #2563eb; }
+    .toggle-off { background: #374151; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -61,7 +63,7 @@
       <div id="signal-feed" class="flex-1 overflow-y-auto p-4 space-y-1"></div>
     </div>
 
-    <!-- CENTER: Stats + Chart + Trade History -->
+    <!-- CENTER -->
     <div class="flex-1 flex flex-col overflow-y-auto p-5 gap-5">
 
       <!-- Stats Bar -->
@@ -88,7 +90,7 @@
         </div>
       </div>
 
-      <!-- Account Equity Chart -->
+      <!-- Chart -->
       <div class="rounded-xl border border-gray-800 p-5" style="background:#1a1d27">
         <div class="flex items-center justify-between mb-4">
           <div>
@@ -131,7 +133,7 @@
       </div>
     </div>
 
-    <!-- RIGHT: Open Positions + Trade Execution -->
+    <!-- RIGHT: Positions + Trade Panel -->
     <div class="w-80 border-l border-gray-800 flex flex-col overflow-y-auto" style="background:#13161f">
 
       <!-- Open Positions -->
@@ -143,72 +145,176 @@
         <div id="positions-list" class="space-y-3"></div>
       </div>
 
-      <!-- Trade Execution -->
-      <div class="p-4">
-        <h2 class="font-semibold text-sm mb-4">Execute Trade</h2>
+      <!-- Trade Panel with Mode Toggle -->
+      <div class="p-4 flex flex-col gap-4">
 
-        <div class="mb-3">
-          <label class="text-xs text-gray-500 mb-1 block">Ticker</label>
-          <input id="trade-ticker" type="text" placeholder="e.g. AAPL"
-            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
-        </div>
-
-        <div class="mb-3">
-          <label class="text-xs text-gray-500 mb-1 block">Side</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button id="side-buy" onclick="setSide('BUY')"
-              class="py-2 rounded-lg text-sm font-medium bg-green-700 text-green-100">BUY</button>
-            <button id="side-sell" onclick="setSide('SELL')"
-              class="py-2 rounded-lg text-sm font-medium bg-gray-700 text-gray-400">SELL</button>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label class="text-xs text-gray-500 mb-1 block">Order Type</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button id="type-market" onclick="setOrderType('Market')"
-              class="py-2 rounded-lg text-sm bg-blue-700 text-white">Market</button>
-            <button id="type-limit" onclick="setOrderType('Limit')"
-              class="py-2 rounded-lg text-sm bg-gray-700 text-gray-400">Limit</button>
-          </div>
-        </div>
-
-        <div class="mb-4">
-          <label class="text-xs text-gray-500 mb-1 block">Shares</label>
-          <input id="trade-shares" type="number" placeholder="0" min="1"
-            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 mb-3">
-          <button onclick="confirmTrade()"
-            class="py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition">
-            Confirm Order
+        <!-- Mode Switcher -->
+        <div class="grid grid-cols-2 gap-1 p-1 rounded-xl" style="background:#0f1117">
+          <button id="mode-manual" onclick="setMode('manual')"
+            class="py-2 rounded-lg text-sm font-medium transition mode-tab-active">
+            Manual
           </button>
-          <button onclick="dismissTrade()"
-            class="py-2.5 rounded-lg text-sm font-semibold bg-gray-700 hover:bg-gray-600 text-gray-300 transition">
-            Dismiss
+          <button id="mode-auto" onclick="setMode('auto')"
+            class="py-2 rounded-lg text-sm font-medium transition mode-tab-inactive">
+            Automatic
           </button>
         </div>
 
-        <p id="trade-msg" class="text-xs text-center mt-2 text-gray-500"></p>
+        <!-- MANUAL MODE -->
+        <div id="panel-manual">
+          <div class="mb-3">
+            <label class="text-xs text-gray-500 mb-1 block">Ticker</label>
+            <input id="trade-ticker" type="text" placeholder="e.g. AAPL"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+          </div>
+          <div class="mb-3">
+            <label class="text-xs text-gray-500 mb-1 block">Side</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="side-buy" onclick="setSide('BUY')"
+                class="py-2 rounded-lg text-sm font-medium bg-green-700 text-green-100">BUY</button>
+              <button id="side-sell" onclick="setSide('SELL')"
+                class="py-2 rounded-lg text-sm font-medium bg-gray-700 text-gray-400">SELL</button>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="text-xs text-gray-500 mb-1 block">Order Type</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="type-market" onclick="setOrderType('Market')"
+                class="py-2 rounded-lg text-sm bg-blue-700 text-white">Market</button>
+              <button id="type-limit" onclick="setOrderType('Limit')"
+                class="py-2 rounded-lg text-sm bg-gray-700 text-gray-400">Limit</button>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="text-xs text-gray-500 mb-1 block">Shares</label>
+            <input id="trade-shares" type="number" placeholder="0" min="1"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="confirmTrade()"
+              class="py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition">
+              Confirm
+            </button>
+            <button onclick="dismissTrade()"
+              class="py-2.5 rounded-lg text-sm font-semibold bg-gray-700 hover:bg-gray-600 text-gray-300 transition">
+              Dismiss
+            </button>
+          </div>
+          <p id="trade-msg" class="text-xs text-center mt-2 text-gray-500"></p>
+        </div>
+
+        <!-- AUTOMATIC MODE -->
+        <div id="panel-auto" class="hidden flex flex-col gap-4">
+
+          <!-- Bot Status -->
+          <div class="rounded-xl border border-gray-700 p-3 flex items-center justify-between" style="background:#0f1117">
+            <div>
+              <p class="text-sm font-medium text-white">Auto Trading</p>
+              <p id="auto-status-label" class="text-xs text-gray-500 mt-0.5">Bot is paused</p>
+            </div>
+            <button id="auto-toggle" onclick="toggleAutoBot()"
+              class="relative w-11 h-6 rounded-full transition toggle-off focus:outline-none">
+              <span id="auto-knob"
+                class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"></span>
+            </button>
+          </div>
+
+          <!-- Rules -->
+          <div class="rounded-xl border border-gray-700 p-3 flex flex-col gap-3" style="background:#0f1117">
+            <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Rules</p>
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block">Take Profit %</label>
+              <div class="flex items-center gap-2">
+                <input id="auto-tp" type="number" value="5" min="0.1" step="0.1"
+                  class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 text-green-400" />
+                <span class="text-xs text-gray-500">%</span>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block">Stop Loss %</label>
+              <div class="flex items-center gap-2">
+                <input id="auto-sl" type="number" value="2" min="0.1" step="0.1"
+                  class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 text-red-400" />
+                <span class="text-xs text-gray-500">%</span>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block">Max Shares / Trade</label>
+              <input id="auto-maxshares" type="number" value="50" min="1"
+                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+            </div>
+            <button onclick="saveAutoSettings()"
+              class="w-full py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition">
+              Save Rules
+            </button>
+            <p id="auto-msg" class="text-xs text-center text-gray-500"></p>
+          </div>
+
+          <!-- Quick Actions on Open Positions -->
+          <div class="rounded-xl border border-gray-700 p-3" style="background:#0f1117">
+            <p class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-3">Quick Actions</p>
+            <div id="auto-positions-list" class="space-y-2"></div>
+          </div>
+
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ── State ───────────────────────────────────────────────
+    // ── State ─────────────────────────────────────────────
     let equityChart = null;
     let allTrades = [];
     let currentFilter = 'All';
     let tradeSide = 'BUY';
     let tradeType = 'Market';
+    let autoEnabled = false;
+    let currentMode = 'manual';
 
-    // ── Utility ─────────────────────────────────────────────
     function fmt(n) {
       return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
     }
 
-    // ── Stats Bar ───────────────────────────────────────────
+    // ── Mode Toggle ────────────────────────────────────────
+    function setMode(mode) {
+      currentMode = mode;
+      const isManual = mode === 'manual';
+      document.getElementById('panel-manual').classList.toggle('hidden', !isManual);
+      document.getElementById('panel-auto').classList.toggle('hidden', isManual);
+      document.getElementById('mode-manual').className = 'py-2 rounded-lg text-sm font-medium transition ' + (isManual ? 'mode-tab-active' : 'mode-tab-inactive');
+      document.getElementById('mode-auto').className = 'py-2 rounded-lg text-sm font-medium transition ' + (!isManual ? 'mode-tab-active' : 'mode-tab-inactive');
+    }
+
+    // ── Auto Bot Toggle ────────────────────────────────────
+    function toggleAutoBot() {
+      autoEnabled = !autoEnabled;
+      const toggle = document.getElementById('auto-toggle');
+      const knob = document.getElementById('auto-knob');
+      const label = document.getElementById('auto-status-label');
+      if (autoEnabled) {
+        toggle.classList.replace('toggle-off', 'toggle-on');
+        knob.style.transform = 'translateX(20px)';
+        label.textContent = 'Bot is active';
+        label.className = 'text-xs text-green-400 mt-0.5';
+      } else {
+        toggle.classList.replace('toggle-on', 'toggle-off');
+        knob.style.transform = 'translateX(0)';
+        label.textContent = 'Bot is paused';
+        label.className = 'text-xs text-gray-500 mt-0.5';
+      }
+    }
+
+    function saveAutoSettings() {
+      const tp = document.getElementById('auto-tp').value;
+      const sl = document.getElementById('auto-sl').value;
+      const max = document.getElementById('auto-maxshares').value;
+      const msg = document.getElementById('auto-msg');
+      msg.textContent = `Rules saved: TP ${tp}% / SL ${sl}% / Max ${max} shares`;
+      msg.className = 'text-xs text-center text-green-400';
+      setTimeout(() => { msg.textContent = ''; }, 3000);
+    }
+
+    // ── Stats Bar ──────────────────────────────────────────
     async function loadStats() {
       try {
         const res = await fetch('/api/account-stats');
@@ -223,7 +329,7 @@
       } catch (e) { console.error('Stats error:', e); }
     }
 
-    // ── Chart ────────────────────────────────────────────────
+    // ── Chart ──────────────────────────────────────────────
     async function loadChart(days) {
       ['30','60','90'].forEach(d => {
         const btn = document.getElementById('btn-' + d);
@@ -243,15 +349,7 @@
           type: 'line',
           data: {
             labels: data.labels,
-            datasets: [{
-              data: data.values,
-              borderColor: color,
-              backgroundColor: color + '22',
-              fill: true,
-              tension: 0.4,
-              pointRadius: 0,
-              borderWidth: 2,
-            }]
+            datasets: [{ data: data.values, borderColor: color, backgroundColor: color + '22', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }]
           },
           options: {
             responsive: true,
@@ -265,7 +363,7 @@
       } catch (e) { console.error('Chart error:', e); }
     }
 
-    // ── Signal Feed ──────────────────────────────────────────
+    // ── Signal Feed ────────────────────────────────────────
     let signalTimer = null;
     function debounceLoadSignals() {
       clearTimeout(signalTimer);
@@ -287,8 +385,7 @@
               const isBullish = /buy|bullish|bull|up|long|boom|soar|surge|gain/i.test(t.tweet_text);
               const badgeClass = isBullish ? 'badge-buy' : 'badge-sell';
               const badgeText = isBullish ? 'BULLISH' : 'BEARISH';
-              const tickerBadges = tickers.slice(0,3).map(tk =>
-                `<span class="text-xs font-mono font-bold text-blue-300">${tk}</span>`).join(' ');
+              const tickerBadges = tickers.slice(0,3).map(tk => `<span class="text-xs font-mono font-bold text-blue-300">${tk}</span>`).join(' ');
               return `<div class="signal-item">
                 <div class="flex items-center justify-between mb-1">
                   <div class="flex gap-1">${tickerBadges || '<span class="text-xs text-gray-600">General</span>'}</div>
@@ -301,7 +398,7 @@
       } catch (e) { console.error('Signal feed error:', e); }
     }
 
-    // ── Trade History ────────────────────────────────────────
+    // ── Trade History ──────────────────────────────────────
     async function loadTradeHistory() {
       try {
         const res = await fetch('/api/trade-history');
@@ -335,11 +432,13 @@
           </tr>`).join('');
     }
 
-    // ── Positions ────────────────────────────────────────────
+    // ── Positions ──────────────────────────────────────────
     async function loadPositions() {
       try {
         const res = await fetch('/api/positions');
         const positions = await res.json();
+
+        // Main positions panel
         const list = document.getElementById('positions-list');
         list.innerHTML = positions.length === 0
           ? '<p class="text-xs text-gray-600 text-center">No open positions</p>'
@@ -362,6 +461,31 @@
                 </button>
               </div>`;
             }).join('');
+
+        // Auto mode quick actions
+        const autoList = document.getElementById('auto-positions-list');
+        autoList.innerHTML = positions.length === 0
+          ? '<p class="text-xs text-gray-600 text-center">No open positions</p>'
+          : positions.map(p => {
+              const isPos = p.pnl >= 0;
+              return `<div class="rounded-lg border border-gray-700 p-3 flex flex-col gap-2" style="background:#13161f">
+                <div class="flex items-center justify-between">
+                  <span class="font-mono font-bold text-sm text-white">${p.ticker}</span>
+                  <span class="text-xs font-medium ${isPos ? 'text-green-400' : 'text-red-400'}">${isPos ? '+' : ''}${p.pnl_pct.toFixed(2)}%</span>
+                </div>
+                <p class="text-xs text-gray-500">${p.shares} shares &middot; P&L: <span class="${isPos ? 'text-green-400' : 'text-red-400'}">${isPos ? '+' : ''}${fmt(p.pnl)}</span></p>
+                <div class="grid grid-cols-2 gap-2">
+                  <button onclick="takeProfitPosition('${p.ticker}')"
+                    class="py-1.5 rounded text-xs font-medium bg-green-900 hover:bg-green-800 text-green-300 transition">
+                    Take Profit
+                  </button>
+                  <button onclick="dismissPosition('${p.ticker}')"
+                    class="py-1.5 rounded text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 transition">
+                    Dismiss
+                  </button>
+                </div>
+              </div>`;
+            }).join('');
       } catch (e) { console.error('Positions error:', e); }
     }
 
@@ -378,28 +502,37 @@
       } catch (e) { console.error('Close error:', e); }
     }
 
-    // ── Trade Execution ──────────────────────────────────────
+    function takeProfitPosition(ticker) {
+      if (!confirm('Take profit on ' + ticker + '?')) return;
+      fetch('/api/positions/close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticker, reason: 'take_profit' })
+      }).then(() => loadPositions());
+    }
+
+    function dismissPosition(ticker) {
+      loadPositions();
+    }
+
+    // ── Manual Trade Execution ─────────────────────────────
     function setSide(side) {
       tradeSide = side;
-      document.getElementById('side-buy').className = 'py-2 rounded-lg text-sm font-medium ' +
-        (side === 'BUY' ? 'bg-green-700 text-green-100' : 'bg-gray-700 text-gray-400');
-      document.getElementById('side-sell').className = 'py-2 rounded-lg text-sm font-medium ' +
-        (side === 'SELL' ? 'bg-red-700 text-red-100' : 'bg-gray-700 text-gray-400');
+      document.getElementById('side-buy').className = 'py-2 rounded-lg text-sm font-medium ' + (side === 'BUY' ? 'bg-green-700 text-green-100' : 'bg-gray-700 text-gray-400');
+      document.getElementById('side-sell').className = 'py-2 rounded-lg text-sm font-medium ' + (side === 'SELL' ? 'bg-red-700 text-red-100' : 'bg-gray-700 text-gray-400');
     }
 
     function setOrderType(type) {
       tradeType = type;
-      document.getElementById('type-market').className = 'py-2 rounded-lg text-sm ' +
-        (type === 'Market' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-400');
-      document.getElementById('type-limit').className = 'py-2 rounded-lg text-sm ' +
-        (type === 'Limit' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-400');
+      document.getElementById('type-market').className = 'py-2 rounded-lg text-sm ' + (type === 'Market' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-400');
+      document.getElementById('type-limit').className = 'py-2 rounded-lg text-sm ' + (type === 'Limit' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-400');
     }
 
     function confirmTrade() {
       const ticker = document.getElementById('trade-ticker').value.trim().toUpperCase();
       const shares = document.getElementById('trade-shares').value;
       const msg = document.getElementById('trade-msg');
-      if (!ticker || !shares) { msg.textContent = 'Please fill in ticker and shares.'; msg.className = 'text-xs text-center mt-2 text-red-400'; return; }
+      if (!ticker || !shares) { msg.textContent = 'Fill in ticker and shares.'; msg.className = 'text-xs text-center mt-2 text-red-400'; return; }
       msg.textContent = `Order submitted: ${tradeSide} ${shares} ${ticker} @ ${tradeType}`;
       msg.className = 'text-xs text-center mt-2 text-green-400';
       setTimeout(() => { msg.textContent = ''; }, 3000);
@@ -409,13 +542,11 @@
       document.getElementById('trade-ticker').value = '';
       document.getElementById('trade-shares').value = '';
       document.getElementById('trade-msg').textContent = '';
-      tradeSide = 'BUY';
-      tradeType = 'Market';
-      setSide('BUY');
-      setOrderType('Market');
+      tradeSide = 'BUY'; tradeType = 'Market';
+      setSide('BUY'); setOrderType('Market');
     }
 
-    // ── Init ─────────────────────────────────────────────────
+    // ── Init ───────────────────────────────────────────────
     loadStats();
     loadChart(30);
     loadSignals();
