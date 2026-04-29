@@ -48,8 +48,7 @@ def get_portfolio_history(days=30):
     for i in range(days, -1, -1):
         date = today - timedelta(days=i)
         labels.append(date.strftime("%b %d"))
-        # Since we don't have historical data, we'll use current equity as baseline
-        # In a real implementation, you'd fetch historical data or use portfolio history API
+# todo: fetch historical data from Alpaca API using get_portfolio_history
         values.append(base_equity)
     
     return {"labels": labels, "values": values}
