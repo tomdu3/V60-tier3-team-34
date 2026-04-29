@@ -27,36 +27,68 @@ Meeting Agenda templates (located in the `/docs` directory in this repo):
 - Meeting - Sprint Retrospective, Review, and Planning --> ./docs/meeting-sprint_retrospective_review_and_planning.docx
 - Meeting - Sprint Open Topic Session --> ./docs/meeting-sprint_open_topic_session.docx
 
-## Our Team
+## Database
+The project uses PostgreSQL for data persistence, managed via SQLAlchemy ORM and Alembic migrations.
 
-Everyone on your team should add their name along with a link to their GitHub
-& optionally their LinkedIn profiles below. Do this in Sprint #1 to validate
-your repo access and to practice PR'ing with your team _before_ you start
-coding!
+### Entity Relationship Diagram (ERD)
+```mermaid
+erDiagram
+    tweets ||--o{ tweet_sentiments : "has"
+    tweets {
+        string tweet_timestamp PK
+        string tweet_text
+        string tweet_link
+        datetime created_at
+    }
+    tweet_sentiments {
+        uuid id PK
+        string tweet_timestamp FK
+        sentiment_type sentiment
+        float confidence_score
+        json stock_tickers
+        datetime analyzed_at
+    }
+    user_settings {
+        uuid id PK
+        string email
+        string username
+        string full_name
+        string avatar_url
+        string password_hash
+        datetime last_login_at
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+        float risk_per_trade
+        int max_positions
+        int max_daily_trades
+        float min_ai_confidence
+    }
+```
 
-- Alex Thomas (Scrum Master) [GitHub](https://github.com/BagelTime) / [LinkedIn](https://linkedin.com/in/ajt11176)
-- Sobebar Ali: [GitHub](https://github.com/sobebarali) / [LinkedIn](https://www.linkedin.com/in/sobebarali/)
-- Tomislav Dukez: [GitHub](https://github.com/tomdu3) / [Linkedin](https://www.linkedin.com/in/tomislav-dukez)
-- Ndzana Christophe: [GitHub](https://github.com/christoban) / [LinkedIn](https://linkedin.com/in/christophe-ndzana)
-- Srikaanth Balajhi: [GitHub](https://github.com/srikaanthtb) / [LinkedIn](https://www.linkedin.com/in/srikaanth-balajhi-4b6171131/)
-- Conrado Figari Vechio (Product Owner) [GitHub](https://github.com/conradofigariv) / [LinkedIn](https://www.linkedin.com/in/conradofigarivechio/)
-- Peter Kabamba [GitHub](https://github.com/pietrols) / [LinkedIn](https://linkedin.com/in/peter-kabamba-959a061b9)
-- John Omokhagbon Ezekiel: [GitHub](https://github.com/Sirius1616) / [Linkedin](https://www.linkedin.com/in/john-ezekiel-dev/)
+### Table Descriptions
+| Table | Description | Purpose |
+| :--- | :--- | :--- |
+| **`tweets`** | Stores historical tweet data scraped from [Jim Cramer](https://www.cnbc.com/jim-cramer-bio/)'s [X account](https://twitter.com/jimcramer). | Primary source of trading signals; indexed by timestamp to prevent duplicates. |
+| **`tweet_sentiments`** | Stores AI analysis of individual tweets. | Links to `tweets` via FK; contains sentiment scores and extracted stock tickers. |
+| **`user_settings`** | Stores user authentication and trading preferences. | Manages profiles, login history, and risk management parameters (e.g., max positions). |
 
-## Database Schema
+## Running Locally
 
-We use PostgreSQL (via Docker Compose) and SQLAlchemy/Alembic for data persistence. The database schema stores scraped tweets and user account data.
-
-![Database Entity Relationship Diagram](./docs/ERD-Reverse_cramer.png)
-
-- **`tweets`**: Stores historical tweet data scraped from X. Used to track data and prevent duplicate processing via the `tweet_timestamp`.
-- **`user_settings`**: Stores user authentication and profile data.
-
-*For more details on setting up the local database, running migrations, and API endpoints, see the [Database Implementation Plan](./docs/db_implementation_plan.md).*
-
-to run app locally:
+To run app locally:
 ```bash
 cd server
 uv sync
 uv run uvicorn main:app
 ```
+
+## Our Team
+
+- Alex Thomas (Scrum Master) [GitHub](https://github.com/BagelTime) / [LinkedIn](https://linkedin.com/in/ajt11176)
+- Sobebar Ali [GitHub](https://github.com/sobebarali) / [LinkedIn](https://www.linkedin.com/in/sobebarali/)
+- Tomislav Dukez [GitHub](https://github.com/tomdu3) / [Linkedin](https://www.linkedin.com/in/tomislav-dukez)
+- Ndzana Christophe [GitHub](https://github.com/christoban) / [LinkedIn](https://linkedin.com/in/christophe-ndzana)
+- Srikaanth Balajhi [GitHub](https://github.com/srikaanthtb) / [LinkedIn](https://www.linkedin.com/in/srikaanth-balajhi-4b6171131/)
+- Conrado Figari Vechio (Product Owner) [GitHub](https://github.com/conradofigariv) / [LinkedIn](https://www.linkedin.com/in/conradofigarivechio/)
+- Peter Kabamba [GitHub](https://github.com/pietrols) / [LinkedIn](https://linkedin.com/in/peter-kabamba-959a061b9)
+- John Omokhagbon Ezekiel: [GitHub](https://github.com/Sirius1616) / [Linkedin](https://www.linkedin.com/in/john-ezekiel-dev/)
