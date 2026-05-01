@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, join
 from sqlalchemy.orm import Session
 from db.database import async_session_maker
 from models.tweet import Tweet
+from models.tweet_sentiment import TweetSentiment
 from models.user_settings import UserSettings
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -23,23 +24,39 @@ async def root():
 @app.get("/api/signal-feed")
 async def get_signal_feed(limit: int = Query(default=20, ge=1, le=100), ticker: str = Query(default="")):
     async with async_session_maker() as session:
-        query = select(Tweet).order_by(Tweet.created_at.desc()).limit(limit)
+        query = select(Tweet, TweetSentiment).join(
+            TweetSentiment, Tweet.tweet_timestamp == TweetSentiment.tweet_timestamp
+        ).order_by(Tweet.created_at.desc()).limit(limit)
+
         if ticker:
             tickers = [t.strip().upper() for t in ticker.split(",") if t.strip()]
             if tickers:
-                query = select(Tweet).where(
-                    or_(*[Tweet.tweet_text.ilike(f"%${t}%") for t in tickers])
-                ).order_by(Tweet.created_at.desc()).limit(limit)
+                query = query.where(
+                    or_(*[TweetSentiment.stock_tickers.contains([t]) for t in tickers])
+                )
+
         result = await session.execute(query)
-        tweets = result.scalars().all()
+        rows = result.all()
+
+        def get_inverse_action(sentiment):
+            if sentiment == "bearish":
+                return "BUY"
+            elif sentiment == "bullish":
+                return "SELL"
+            return None
+
         return [
             {
                 "tweet_timestamp": t.tweet_timestamp,
                 "tweet_text": t.tweet_text,
                 "tweet_link": t.tweet_link,
                 "created_at": t.created_at.isoformat() if t.created_at else None,
+                "sentiment": ts.sentiment,
+                "confidence_score": ts.confidence_score,
+                "stock_tickers": ts.stock_tickers,
+                "inverse_action": get_inverse_action(ts.sentiment),
             }
-            for t in tweets
+            for t, ts in rows
         ]
 
 @app.get("/api/account-equity")
