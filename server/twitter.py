@@ -30,7 +30,10 @@ class TwitterScraper:
             "https://nitter.poast.org", 
             "https://nitter.privacyredirect.com",
             "https://nitter.uni-sonia.com",
-            "https://xcancel.com"
+            "https://xcancel.com",
+            "https://nitter.catsarch.com/"
+            "https://nitter.kareem.one/"
+            "https://nitter.tiekoetter.com/"
         ]
         
         # Initialize Supabase client if credentials are available
