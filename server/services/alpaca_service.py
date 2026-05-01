@@ -36,22 +36,44 @@ def get_account_info():
 
 
 def get_portfolio_history(days=30):
-    """Fetch historical equity data for the chart."""
-    # data coming from account balance
-    account = trading_client.get_account()
-    base_equity = float(account.equity)
-    
-    labels = []
-    values = []
-    today = datetime.now()
-    
-    for i in range(days, -1, -1):
-        date = today - timedelta(days=i)
-        labels.append(date.strftime("%b %d"))
-# todo: fetch historical data from Alpaca API using get_portfolio_history
-        values.append(base_equity)
-    
-    return {"labels": labels, "values": values}
+
+    # Validate input
+    valid_periods = {30: "30D", 60: "60D", 90: "90D"}
+    if days not in valid_periods:
+        raise ValueError(f"days must be 30, 60, or 90, got {days}")
+
+    period = valid_periods[days]
+
+    try:
+        # Fetch portfolio history from Alpaca
+        history = trading_client.get_portfolio_history(
+            period=period,
+            timeframe="1D"
+        )
+
+        # Validate response
+        if not history or not hasattr(history, '__iter__'):
+            raise Exception("Invalid response from Alpaca API")
+
+        # Parse response and format for frontend
+        labels = []
+        values = []
+
+        for item in history:
+            if not hasattr(item, 'timestamp') or not hasattr(item, 'equity'):
+                continue  # Skip malformed entries
+
+            labels.append(item.timestamp.strftime("%b %d"))
+            values.append(float(item.equity))
+
+        if not labels:
+            raise Exception("No valid data points received from API")
+
+        return {"labels": labels, "values": values}
+
+    except Exception as e:
+        # Re-raise with context
+        raise Exception(f"Failed to fetch portfolio history: {str(e)}") from e
 
 
 def get_positions():
