@@ -2,10 +2,12 @@ import os
 from anthropic import Anthropic
 from typing import Dict, Any
 import json
+from dotenv import load_dotenv
 
 
 class ClaudeService:
     def __init__(self):
+        load_dotenv()
         api_key = os.getenv('ANTHROPIC_API_KEY')
         if not api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable is not set!")
