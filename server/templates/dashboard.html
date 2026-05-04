@@ -43,7 +43,16 @@
       <a href="#" class="hover:text-white transition">Trade History</a>
       <a href="#" class="hover:text-white transition">Settings</a>
     </div>
-    <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold">JC</div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1 p-1 rounded-xl" style="background:#0f1117">
+        <button id="env-paper" onclick="setTradingEnv('paper')"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white">Paper</button>
+        <button id="env-live" onclick="setTradingEnv('live')"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-gray-800 text-gray-400">Live</button>
+      </div>
+      <span id="account-env-label" class="text-xs font-semibold text-blue-300">PAPER</span>
+      <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold">JC</div>
+    </div>
   </nav>
 
   <!-- Main Layout -->
@@ -149,7 +158,7 @@
       <div class="p-4 border-b border-gray-800">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold text-sm">Open Positions</h2>
-          <button class="text-xs text-red-400 hover:text-red-300">Close All</button>
+          <button id="close-all-button" onclick="closeAllPositions()" class="text-xs text-red-400 hover:text-red-300">Close All</button>
         </div>
         <div id="positions-list" class="space-y-3"></div>
       </div>
@@ -199,8 +208,13 @@
             <input id="trade-shares" type="number" placeholder="0" min="1"
               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
           </div>
+          <div id="limit-price-row" class="mb-4 hidden">
+            <label class="text-xs text-gray-500 mb-1 block">Limit Price</label>
+            <input id="trade-limit-price" type="number" placeholder="0.00" min="0.01" step="0.01"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+          </div>
           <div class="grid grid-cols-2 gap-2">
-            <button onclick="confirmTrade()"
+            <button id="trade-confirm-button" onclick="confirmTrade()"
               class="py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition">
               Confirm
             </button>
@@ -309,9 +323,74 @@
     let currentMode = 'manual';
     let chartExpanded = false;
     let currentChartDays = 30;
+    let currentTradingEnv = localStorage.getItem('tradingEnv') === 'live' ? 'live' : 'paper';
+    let tradeRequestPending = false;
 
     function fmt(n) {
       return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+    }
+
+    function envLabel() {
+      return currentTradingEnv.toUpperCase();
+    }
+
+    function apiUrl(path, params = {}) {
+      const query = new URLSearchParams({ ...params, env: currentTradingEnv });
+      return path + '?' + query.toString();
+    }
+
+    async function readApiResponse(res) {
+      const contentType = res.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await res.json() : await res.text();
+      if (!res.ok) {
+        const detail = typeof data === 'string' ? data : data.detail || data.message || JSON.stringify(data);
+        throw new Error(detail);
+      }
+      return data;
+    }
+
+    function setTradingEnv(env) {
+      if (env === currentTradingEnv) return;
+      if (env === 'live' && !confirm('Switch to LIVE Alpaca account? Account data and trade actions will use real-money live trading.')) {
+        updateTradingEnvUi();
+        return;
+      }
+      currentTradingEnv = env;
+      localStorage.setItem('tradingEnv', currentTradingEnv);
+      updateTradingEnvUi();
+      refreshAccountData();
+    }
+
+    function updateTradingEnvUi() {
+      const isLive = currentTradingEnv === 'live';
+      document.getElementById('env-paper').className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition ' + (!isLive ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400');
+      document.getElementById('env-live').className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition ' + (isLive ? 'bg-red-700 text-white' : 'bg-gray-800 text-gray-400');
+      const label = document.getElementById('account-env-label');
+      label.textContent = envLabel();
+      label.className = 'text-xs font-semibold ' + (isLive ? 'text-red-300' : 'text-blue-300');
+    }
+
+    function setTradePending(isPending) {
+      tradeRequestPending = isPending;
+      document.getElementById('trade-confirm-button').disabled = isPending;
+      document.getElementById('trade-confirm-button').classList.toggle('opacity-60', isPending);
+      document.getElementById('close-all-button').disabled = isPending;
+      document.getElementById('close-all-button').classList.toggle('opacity-60', isPending);
+    }
+
+    function showTradeMessage(message, isError = false) {
+      const msg = document.getElementById('trade-msg');
+      msg.textContent = message;
+      msg.className = 'text-xs text-center mt-2 ' + (isError ? 'text-red-400' : 'text-green-400');
+    }
+
+    async function refreshAccountData() {
+      await Promise.all([
+        loadStats(),
+        loadChart(currentChartDays),
+        loadTradeHistory(),
+        loadPositions()
+      ]);
     }
 
     // ── Chart Expand/Collapse ──────────────────────────────
@@ -368,8 +447,8 @@
     // ── Stats Bar ──────────────────────────────────────────
     async function loadStats() {
       try {
-        const res = await fetch('/api/account-stats');
-        const d = await res.json();
+        const res = await fetch(apiUrl('/api/account-stats'));
+        const d = await readApiResponse(res);
         document.getElementById('stat-equity').textContent = fmt(d.total_equity);
         const pnlEl = document.getElementById('stat-pnl');
         pnlEl.textContent = fmt(d.daily_pnl);
@@ -377,7 +456,14 @@
         document.getElementById('stat-pnl-pct').textContent = (d.daily_pnl >= 0 ? '+' : '') + d.daily_pnl_pct.toFixed(2) + '% today';
         document.getElementById('stat-cash').textContent = fmt(d.cash_balance);
         document.getElementById('stat-winrate').textContent = d.win_rate.toFixed(1) + '%';
-      } catch (e) { console.error('Stats error:', e); }
+      } catch (e) {
+        console.error('Stats error:', e);
+        document.getElementById('stat-equity').textContent = '—';
+        document.getElementById('stat-pnl').textContent = '—';
+        document.getElementById('stat-pnl-pct').textContent = e.message;
+        document.getElementById('stat-cash').textContent = '—';
+        document.getElementById('stat-winrate').textContent = '—';
+      }
     }
 
     // ── Chart Helper ───────────────────────────────────────
@@ -434,8 +520,8 @@
         }
       });
       try {
-        const res = await fetch('/api/account-equity?days=' + days);
-        const data = await res.json();
+        const res = await fetch(apiUrl('/api/account-equity', { days }));
+        const data = await readApiResponse(res);
         const first = data.values[0], last = data.values[data.values.length - 1];
         const change = last - first, changePct = ((change / first) * 100).toFixed(2);
         const isPositive = change >= 0;
@@ -448,20 +534,26 @@
         if (chartExpanded) {
           equityChartExpanded = createEquityChart('equityChartExpanded', data);
         }
-      } catch (e) { console.error('Chart error:', e); }
+      } catch (e) {
+        console.error('Chart error:', e);
+        document.getElementById('equity-change').textContent = e.message;
+      }
     }
 
     async function loadChartExpanded(days) {
       try {
-        const res = await fetch('/api/account-equity?days=' + days);
-        const data = await res.json();
+        const res = await fetch(apiUrl('/api/account-equity', { days }));
+        const data = await readApiResponse(res);
         const first = data.values[0], last = data.values[data.values.length - 1];
         const change = last - first, changePct = ((change / first) * 100).toFixed(2);
         const isPositive = change >= 0;
         const changeHtml = `<span class="${isPositive ? 'text-green-400' : 'text-red-400'}">${isPositive ? '+' : ''}${fmt(change)} (${changePct}%)</span>`;
         document.getElementById('equity-change-expanded').innerHTML = changeHtml;
         equityChartExpanded = createEquityChart('equityChartExpanded', data);
-      } catch (e) { console.error('Expanded chart error:', e); }
+      } catch (e) {
+        console.error('Expanded chart error:', e);
+        document.getElementById('equity-change-expanded').textContent = e.message;
+      }
     }
 
     // ── Signal Feed ────────────────────────────────────────
@@ -530,10 +622,14 @@
     // ── Trade History ──────────────────────────────────────
     async function loadTradeHistory() {
       try {
-        const res = await fetch('/api/trade-history');
-        allTrades = await res.json();
+        const res = await fetch(apiUrl('/api/trade-history', { limit: 50 }));
+        allTrades = await readApiResponse(res);
         renderTrades();
-      } catch (e) { console.error('Trade history error:', e); }
+      } catch (e) {
+        console.error('Trade history error:', e);
+        allTrades = [];
+        renderTrades();
+      }
     }
 
     function filterTrades(status) {
@@ -564,8 +660,8 @@
     // ── Positions ──────────────────────────────────────────
     async function loadPositions() {
       try {
-        const res = await fetch('/api/positions');
-        const positions = await res.json();
+        const res = await fetch(apiUrl('/api/positions'));
+        const positions = await readApiResponse(res);
 
         const list = document.getElementById('positions-list');
         list.innerHTML = positions.length === 0
@@ -613,29 +709,74 @@
                 </div>
               </div>`;
             }).join('');
-      } catch (e) { console.error('Positions error:', e); }
+      } catch (e) {
+        console.error('Positions error:', e);
+        document.getElementById('positions-list').innerHTML = '<p class="text-xs text-red-400 text-center">' + e.message + '</p>';
+        document.getElementById('auto-positions-list').innerHTML = '<p class="text-xs text-red-400 text-center">' + e.message + '</p>';
+      }
     }
 
     async function closePosition(ticker) {
+      if (tradeRequestPending) return;
       if (!confirm('Close position for ' + ticker + '?')) return;
+      setTradePending(true);
       try {
         const res = await fetch('/api/positions/close', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticker })
+          body: JSON.stringify({ ticker, env: currentTradingEnv })
         });
-        const d = await res.json();
-        if (d.success) loadPositions();
-      } catch (e) { console.error('Close error:', e); }
+        const d = await readApiResponse(res);
+        showTradeMessage(d.message || 'Position close submitted.');
+        await refreshAccountData();
+      } catch (e) {
+        console.error('Close error:', e);
+        showTradeMessage(e.message, true);
+      } finally {
+        setTradePending(false);
+      }
     }
 
-    function takeProfitPosition(ticker) {
+    async function closeAllPositions() {
+      if (tradeRequestPending) return;
+      if (!confirm('Close all open positions in ' + envLabel() + '?')) return;
+      setTradePending(true);
+      try {
+        const res = await fetch('/api/positions/close-all', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ env: currentTradingEnv })
+        });
+        const d = await readApiResponse(res);
+        showTradeMessage(d.message || 'Close-all request submitted.');
+        await refreshAccountData();
+      } catch (e) {
+        console.error('Close all error:', e);
+        showTradeMessage(e.message, true);
+      } finally {
+        setTradePending(false);
+      }
+    }
+
+    async function takeProfitPosition(ticker) {
+      if (tradeRequestPending) return;
       if (!confirm('Take profit on ' + ticker + '?')) return;
-      fetch('/api/positions/close', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticker, reason: 'take_profit' })
-      }).then(() => loadPositions());
+      setTradePending(true);
+      try {
+        const res = await fetch('/api/positions/close', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticker, reason: 'take_profit', env: currentTradingEnv })
+        });
+        const d = await readApiResponse(res);
+        showTradeMessage(d.message || 'Take-profit close submitted.');
+        await refreshAccountData();
+      } catch (e) {
+        console.error('Take profit error:', e);
+        showTradeMessage(e.message, true);
+      } finally {
+        setTradePending(false);
+      }
     }
 
     function dismissPosition(ticker) {
@@ -653,32 +794,61 @@
       tradeType = type;
       document.getElementById('type-market').className = 'py-2 rounded-lg text-sm ' + (type === 'Market' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-400');
       document.getElementById('type-limit').className = 'py-2 rounded-lg text-sm ' + (type === 'Limit' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-400');
+      document.getElementById('limit-price-row').classList.toggle('hidden', type !== 'Limit');
     }
 
-    function confirmTrade() {
+    async function confirmTrade() {
+      if (tradeRequestPending) return;
       const ticker = document.getElementById('trade-ticker').value.trim().toUpperCase();
       const shares = document.getElementById('trade-shares').value;
-      const msg = document.getElementById('trade-msg');
-      if (!ticker || !shares) { msg.textContent = 'Fill in ticker and shares.'; msg.className = 'text-xs text-center mt-2 text-red-400'; return; }
-      msg.textContent = `Order submitted: ${tradeSide} ${shares} ${ticker} @ ${tradeType}`;
-      msg.className = 'text-xs text-center mt-2 text-green-400';
-      setTimeout(() => { msg.textContent = ''; }, 3000);
+      const limitPrice = document.getElementById('trade-limit-price').value;
+      if (!ticker || !shares) {
+        showTradeMessage('Fill in ticker and shares.', true);
+        return;
+      }
+      if (tradeType === 'Limit' && !limitPrice) {
+        showTradeMessage('Fill in limit price for limit orders.', true);
+        return;
+      }
+      setTradePending(true);
+      showTradeMessage('Submitting order...');
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            env: currentTradingEnv,
+            ticker,
+            side: tradeSide,
+            order_type: tradeType,
+            qty: shares,
+            limit_price: tradeType === 'Limit' ? limitPrice : null
+          })
+        });
+        const d = await readApiResponse(res);
+        showTradeMessage(d.message || `Order submitted: ${tradeSide} ${shares} ${ticker} @ ${tradeType}`);
+        await refreshAccountData();
+      } catch (e) {
+        console.error('Order error:', e);
+        showTradeMessage(e.message, true);
+      } finally {
+        setTradePending(false);
+      }
     }
 
     function dismissTrade() {
       document.getElementById('trade-ticker').value = '';
       document.getElementById('trade-shares').value = '';
+      document.getElementById('trade-limit-price').value = '';
       document.getElementById('trade-msg').textContent = '';
       tradeSide = 'BUY'; tradeType = 'Market';
       setSide('BUY'); setOrderType('Market');
     }
 
     // ── Init ───────────────────────────────────────────────
-    loadStats();
-    loadChart(30);
+    updateTradingEnvUi();
+    refreshAccountData();
     loadSignals();
-    loadTradeHistory();
-    loadPositions();
     setInterval(loadSignals, 60000);
     setInterval(loadStats, 30000);
     setInterval(loadPositions, 30000);
