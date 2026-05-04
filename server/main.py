@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import asyncio
-from services.alpaca_service import close_all_alpaca_positions, close_alpaca_position, get_account_info, get_portfolio_history, get_positions, get_trade_history, submit_stock_order
+from services.alpaca_service import cancel_alpaca_order, close_all_alpaca_positions, close_alpaca_position, get_account_info, get_portfolio_history, get_positions, get_trade_history, submit_stock_order
 from services.supabase_signal_service import read_sentiments_from_supabase, read_signal_feed_from_supabase
 
 app = FastAPI()
@@ -118,6 +118,15 @@ async def submit_order(data: dict):
             data.get("qty", ""),
             data.get("limit_price")
         )
+    except Exception as e:
+        alpaca_error_response(e)
+
+@app.post("/api/orders/cancel")
+async def cancel_order(data: dict):
+    trading_env = validate_trading_env(data.get("env", "paper"))
+    loop = asyncio.get_event_loop()
+    try:
+        return await loop.run_in_executor(None, cancel_alpaca_order, trading_env, data.get("order_id", ""))
     except Exception as e:
         alpaca_error_response(e)
 

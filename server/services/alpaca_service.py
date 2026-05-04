@@ -83,6 +83,13 @@ def _normalize_side(side):
     raise ValueError("side must be 'buy' or 'sell'")
 
 
+def _normalize_order_id(order_id):
+    normalized_id = (order_id or "").strip()
+    if not normalized_id:
+        raise ValueError("order_id is required")
+    return normalized_id
+
+
 def _enum_name(value, default="UNKNOWN"):
     if value is None:
         return default
@@ -272,3 +279,18 @@ def close_all_alpaca_positions(env):
         }
     except Exception as e:
         raise Exception(f"Failed to close all {normalized_env} positions: {str(e)}") from e
+
+
+def cancel_alpaca_order(env, order_id):
+    normalized_env = _normalize_env(env)
+    normalized_order_id = _normalize_order_id(order_id)
+    try:
+        _get_trading_client(normalized_env).cancel_order_by_id(normalized_order_id)
+        return {
+            "success": True,
+            "environment": normalized_env,
+            "order_id": normalized_order_id,
+            "message": f"{normalized_env.upper()} order cancel submitted"
+        }
+    except Exception as e:
+        raise Exception(f"Failed to cancel {normalized_env} order {normalized_order_id}: {str(e)}") from e
