@@ -1,16 +1,10 @@
 from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, or_
-from sqlalchemy.orm import Session
-from db.database import async_session_maker
-from models.tweet import Tweet
-from models.tweet_sentiment import TweetSentiment
-from models.user_settings import UserSettings
 from pathlib import Path
-from datetime import datetime, timedelta
 import asyncio
 from services.alpaca_service import get_account_info, get_portfolio_history, get_positions, get_trade_history
+from services.supabase_signal_service import read_sentiments_from_supabase, read_signal_feed_from_supabase
 
 app = FastAPI()
 
@@ -24,80 +18,25 @@ async def root():
 
 @app.get("/api/signal-feed")
 async def get_signal_feed(limit: int = Query(default=20, ge=1, le=100), ticker: str = Query(default="")):
-    async with async_session_maker() as session:
-        query = select(Tweet, TweetSentiment).join(
-            TweetSentiment, Tweet.tweet_timestamp == TweetSentiment.tweet_timestamp
-        ).order_by(Tweet.created_at.desc()).limit(limit)
-
-        if ticker:
-            tickers = [t.strip().upper() for t in ticker.split(",") if t.strip()]
-            if tickers:
-                query = query.where(
-                    or_(*[TweetSentiment.stock_tickers.contains([t]) for t in tickers])
-                )
-
-        result = await session.execute(query)
-        rows = result.all()
-
-        def get_inverse_action(sentiment):
-            if sentiment == "bearish":
-                return "BUY"
-            elif sentiment == "bullish":
-                return "SELL"
-            return None
-
-        return [
-            {
-                "tweet_timestamp": t.tweet_timestamp,
-                "tweet_text": t.tweet_text,
-                "tweet_link": t.tweet_link,
-                "created_at": t.created_at.isoformat() if t.created_at else None,
-                "sentiment": ts.sentiment,
-                "confidence_score": ts.confidence_score,
-                "stock_tickers": ts.stock_tickers,
-                "inverse_action": get_inverse_action(ts.sentiment),
-            }
-            for t, ts in rows
-        ]
+    return read_signal_feed_from_supabase(limit, ticker)
 
 @app.get("/api/debug/sentiments")
 async def debug_sentiments(limit: int = Query(default=10, ge=1, le=100)):
-    async with async_session_maker() as session:
-        result = await session.execute(
-            select(TweetSentiment).order_by(TweetSentiment.analyzed_at.desc()).limit(limit)
-        )
-        sentiments = result.scalars().all()
-        return [
-            {
-                "id": s.id,
-                "tweet_timestamp": s.tweet_timestamp,
-                "sentiment": s.sentiment,
-                "confidence_score": s.confidence_score,
-                "stock_tickers": s.stock_tickers,
-            }
-            for s in sentiments
-        ]
+    return read_sentiments_from_supabase(limit)
 
 @app.get("/api/debug/tweets-with-sentiments")
 async def debug_tweets_with_sentiments(limit: int = Query(default=10, ge=1, le=100)):
-    async with async_session_maker() as session:
-        query = select(Tweet, TweetSentiment).outerjoin(
-            TweetSentiment, Tweet.tweet_timestamp == TweetSentiment.tweet_timestamp
-        ).order_by(Tweet.created_at.desc()).limit(limit)
-
-        result = await session.execute(query)
-        rows = result.all()
-
-        return [
-            {
-                "tweet_timestamp": t.tweet_timestamp,
-                "tweet_text": t.tweet_text[:50] if t.tweet_text else None,
-                "has_sentiment": ts is not None,
-                "sentiment": ts.sentiment if ts else None,
-                "stock_tickers": ts.stock_tickers if ts else None,
-            }
-            for t, ts in rows
-        ]
+    signals = read_signal_feed_from_supabase(limit)
+    return [
+        {
+            "tweet_timestamp": s.get("tweet_timestamp"),
+            "tweet_text": s.get("tweet_text")[:50] if s.get("tweet_text") else None,
+            "has_sentiment": True,
+            "sentiment": s.get("sentiment"),
+            "stock_tickers": s.get("stock_tickers"),
+        }
+        for s in signals
+    ]
 
 @app.get("/api/account-equity")
 async def get_account_equity(days: int = Query(default=30, ge=1, le=365)):
@@ -124,6 +63,9 @@ async def get_trade_history_endpoint():
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, get_trade_history)
 
+# Legacy SQLAlchemy endpoints kept for manual/debug access only or if we ever decide to move off supabase; 
+# imports stay local so Supabase-backed app paths do not depend on DATABASE_URL unless these routes are called.
+# These are not used by the main application, again unless we decide to move off supabase.
 @app.get("/tweets")
 async def get_tweets(limit: int = Query(default=5, ge=1, le=100)):
     async with async_session_maker() as session:

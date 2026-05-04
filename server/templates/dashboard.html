@@ -476,19 +476,25 @@
       const url = '/api/signal-feed?limit=30' + (ticker ? '&ticker=' + encodeURIComponent(ticker) : '');
       try {
         const res = await fetch(url);
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(errorText || 'Signal feed request failed');
+        }
         const tweets = await res.json();
         document.getElementById('signal-count').textContent = tweets.length + ' signals';
         const feed = document.getElementById('signal-feed');
         feed.innerHTML = tweets.length === 0
           ? '<p class="text-xs text-gray-600 text-center mt-8">No signals found</p>'
           : tweets.map(t => {
-              const tickers = (t.stock_tickers || []).slice(0, 3);
+              const tickers = Array.isArray(t.stock_tickers) ? t.stock_tickers.slice(0, 3) : [];
               const isBearish = t.sentiment === 'bearish';
-              const badgeClass = isBearish ? 'badge-buy' : 'badge-sell';
-              const badgeText = isBearish ? 'BEARISH' : 'BULLISH';
+              const isBullish = t.sentiment === 'bullish';
+              const badgeClass = isBearish ? 'badge-buy' : isBullish ? 'badge-sell' : 'bg-gray-700 text-gray-300 border border-gray-500';
+              const badgeText = isBearish ? 'BEARISH' : isBullish ? 'BULLISH' : 'NEUTRAL';
               const tickerBadges = tickers.map(tk => `<span class="text-xs font-mono font-bold text-blue-300">${tk}</span>`).join(' ');
               const primaryTicker = tickers.length > 0 ? tickers[0] : '';
-              const confidencePercent = (t.confidence_score * 100).toFixed(1);
+              const confidenceScore = Number(t.confidence_score) || 0;
+              const confidencePercent = (confidenceScore * 100).toFixed(1);
               const actionText = t.inverse_action || 'HOLD';
               const actionClass = actionText === 'BUY' ? 'text-green-400' : actionText === 'SELL' ? 'text-red-400' : 'text-gray-400';
               return `<div class="signal-item">
@@ -502,12 +508,16 @@
                   <span class="text-xs font-bold ${actionClass}">→ ${actionText}</span>
                 </div>
                 <div class="flex gap-1.5">
-                  ${primaryTicker ? `<button onclick="tradeFromSignal('${primaryTicker}', '${t.inverse_action}')" class="flex-1 py-1.5 rounded text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white transition">Trade</button>` : ''}
+                  ${primaryTicker && t.inverse_action ? `<button onclick="tradeFromSignal('${primaryTicker}', '${t.inverse_action}')" class="flex-1 py-1.5 rounded text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white transition">Trade</button>` : ''}
                   ${t.tweet_link ? `<a href="${t.tweet_link}" target="_blank" class="flex-1 py-1.5 rounded text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 transition text-center">View</a>` : ''}
                 </div>
               </div>`;
             }).join('');
-      } catch (e) { console.error('Signal feed error:', e); }
+      } catch (e) {
+        console.error('Signal feed error:', e);
+        document.getElementById('signal-count').textContent = '0 signals';
+        document.getElementById('signal-feed').innerHTML = '<p class="text-xs text-red-400 text-center mt-8">Signal feed unavailable</p>';
+      }
     }
 
     function tradeFromSignal(ticker, side) {
