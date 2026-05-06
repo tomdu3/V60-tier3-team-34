@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
 from alpaca.trading.client import TradingClient
-from alpaca.trading.requests import GetOrdersRequest, GetPortfolioHistoryRequest
+from alpaca.trading.enums import OrderSide, TimeInForce
+from alpaca.trading.requests import GetOrdersRequest, GetPortfolioHistoryRequest, MarketOrderRequest, LimitOrderRequest
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
@@ -135,3 +136,108 @@ def get_trade_history(limit=20):
         return result
     except Exception as e:
         raise Exception(f"Failed to fetch trade history: {str(e)}") from e
+
+
+def submit_stock_order(ticker, side, order_type, qty, limit_price=None):
+    try:
+        symbol = (ticker or "").strip().upper()
+        if not symbol:
+            raise ValueError("ticker is required")
+        
+        normalized_side = (side or "").strip().upper()
+        if normalized_side not in ("BUY", "SELL"):
+            raise ValueError("side must be 'BUY' or 'SELL'")
+        
+        try:
+            qty_float = float(qty)
+        except (TypeError, ValueError):
+            raise ValueError("qty must be a positive number")
+        
+        if qty_float <= 0:
+            raise ValueError("qty must be a positive number")
+        
+        # VALIDATE SELL ORDERS - prevent accidental shorts
+        if normalized_side == "SELL":
+            positions = get_positions()
+            position = next((p for p in positions if p["ticker"] == symbol), None)
+            if not position:
+                raise ValueError(f"No open position found for {symbol}. Cannot sell without owning shares.")
+            if position["shares"] < qty_float:
+                raise ValueError(f"Cannot sell {qty_float:g} shares of {symbol}. Only {position['shares']:g} shares owned.")
+        
+        side_enum = OrderSide.SELL if normalized_side == "SELL" else OrderSide.BUY
+        order_type_lower = (order_type or "market").strip().lower()
+        
+        if order_type_lower == "market":
+            request = MarketOrderRequest(
+                symbol=symbol,
+                qty=qty_float,
+                side=side_enum,
+                time_in_force=TimeInForce.DAY
+            )
+        elif order_type_lower == "limit":
+            if not limit_price:
+                raise ValueError("limit_price is required for limit orders")
+            try:
+                limit_price_float = float(limit_price)
+            except (TypeError, ValueError):
+                raise ValueError("limit_price must be a positive number")
+            if limit_price_float <= 0:
+                raise ValueError("limit_price must be a positive number")
+            
+            request = LimitOrderRequest(
+                symbol=symbol,
+                qty=qty_float,
+                side=side_enum,
+                limit_price=limit_price_float,
+                time_in_force=TimeInForce.DAY
+            )
+        else:
+            raise ValueError("order_type must be 'market' or 'limit'")
+        
+        order = _get_trading_client().submit_order(order_data=request)
+        return {
+            "success": True,
+            "ticker": symbol,
+            "side": normalized_side,
+            "qty": qty_float,
+            "order_type": order_type_lower,
+            "status": order.status.name if order.status else "UNKNOWN",
+            "message": f"Order submitted: {normalized_side} {qty_float:g} {symbol} @ {order_type_lower}"
+        }
+    except ValueError:
+        raise
+    except Exception as e:
+        raise Exception(f"Failed to submit order: {str(e)}") from e
+
+
+def close_position(ticker):
+    try:
+        symbol = (ticker or "").strip().upper()
+        if not symbol:
+            raise ValueError("ticker is required")
+        
+        order = _get_trading_client().close_position(symbol)
+        return {
+            "success": True,
+            "ticker": symbol,
+            "message": f"Position close submitted for {symbol}"
+        }
+    except Exception as e:
+        raise Exception(f"Failed to close position for {ticker}: {str(e)}") from e
+
+
+def cancel_order(order_id):
+    try:
+        order_id_str = (order_id or "").strip()
+        if not order_id_str:
+            raise ValueError("order_id is required")
+        
+        _get_trading_client().cancel_order_by_id(order_id_str)
+        return {
+            "success": True,
+            "order_id": order_id_str,
+            "message": f"Order cancel submitted for {order_id_str}"
+        }
+    except Exception as e:
+        raise Exception(f"Failed to cancel order {order_id}: {str(e)}") from e
