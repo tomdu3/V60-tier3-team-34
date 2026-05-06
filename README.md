@@ -1,17 +1,45 @@
-# voyage-tasks
+# CramerBot — Inverse Cramer Trading Bot
 
-Your project's `readme` is as important to success as your code. For
-this reason you should put as much care into its creation and maintenance
-as you would any other component of the application.
+An automated algorithmic trading platform that monitors Jim Cramer's Twitter feed, analyzes sentiment with AI, and executes inverse trades based on the theory that contrarian betting against Cramer is profitable.
 
-If you are unsure of what should go into the `readme` let this article,
-written by an experienced Chingu, be your starting point -
-[Keys to a well written README](https://tinyurl.com/yk3wubft).
+## Overview
 
-And before we go there's "one more thing"! Once you decide what to include
-in your `readme` feel free to replace the text we've provided here.
+CramerBot automatically:
+1. **Scrapes** Jim Cramer's X (Twitter) feed in real-time
+2. **Analyzes** tweets using Claude AI to extract tickers and sentiment
+3. **Generates inverse signals** (bearish → BUY, bullish → SELL)
+4. **Executes trades** via Alpaca API with manual or automated modes
+5. **Tracks performance** with real-time portfolio metrics and equity charts
 
-> Own it & Make it your Own!
+## Tech Stack
+
+### Frontend
+- **HTML/CSS/JavaScript** — Dashboard UI with dark theme
+- **Tailwind CSS** — Responsive styling
+- **Chart.js** — Real-time equity performance charts
+- **Vanilla JS** — Signal feed, trade panel, portfolio management
+
+### Backend
+- **Python 3.14+** — Core runtime
+- **FastAPI** — REST API framework
+- **SQLAlchemy** — ORM for database models
+- **Alembic** — Database schema migrations
+- **Anthropic Claude API** — Sentiment analysis & ticker extraction
+- **Alpaca Trade API** — Brokerage integration (paper + live trading)
+- **Playwright** — X/Twitter scraping automation
+- **asyncpg** — Async PostgreSQL driver
+
+### Database
+- **PostgreSQL** — Primary data store (hosted on Supabase)
+- **Tables:**
+  - `tweets` — Raw scraped tweets from Jim Cramer
+  - `tweet_sentiments` — AI-analyzed sentiment, confidence, tickers
+  - `user_settings` — User profiles, API keys, risk parameters
+
+  ### Deployment Platforms
+- **Render** — Hosting (Python/FastAPI backend)
+- **Supabase** — PostgreSQL database & real-time subscriptions
+- **Alpaca** — Trading API (paper trading for testing, live for production)
 
 ## Team Documents
 
