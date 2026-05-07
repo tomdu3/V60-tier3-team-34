@@ -221,15 +221,6 @@ def submit_stock_order(env, ticker, side, order_type, qty, limit_price=None):
     normalized_order_type = (order_type or "market").strip().lower()
 
     try:
-        # Validate SELL orders to prevent accidental short positions
-        if normalized_side == OrderSide.SELL:
-            positions = get_positions(normalized_env)
-            position = next((p for p in positions if p["ticker"] == symbol), None)
-            if not position:
-                raise ValueError(f"No open position found for {symbol}. Cannot sell without owning shares.")
-            if position["shares"] < normalized_qty:
-                raise ValueError(f"Cannot sell {normalized_qty:g} shares of {symbol}. Only {position['shares']:g} shares owned.")
-
         if normalized_order_type == "market":
             request = MarketOrderRequest(
                 symbol=symbol,
