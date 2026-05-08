@@ -1,10 +1,13 @@
 # CramerBot — Inverse Cramer Trading Bot
 
+[![CramerBot Screenshot](./docs/cramer-screenshot.png)](https://cramerbot.vercel.app)
+
 An automated algorithmic trading platform that monitors Jim Cramer's Twitter feed, analyzes sentiment with AI, and executes inverse trades based on the theory that contrarian betting against Cramer is profitable.
 
 ## Overview
 
 CramerBot automatically:
+
 1. **Scrapes** Jim Cramer's X (Twitter) feed in real-time
 2. **Analyzes** tweets using Claude AI to extract tickers and sentiment
 3. **Generates inverse signals** (bearish → BUY, bullish → SELL)
@@ -14,12 +17,14 @@ CramerBot automatically:
 ## Tech Stack
 
 ### Frontend
+
 - **HTML/CSS/JavaScript** — Dashboard UI with dark theme
 - **Tailwind CSS** — Responsive styling
 - **Chart.js** — Real-time equity performance charts
 - **Vanilla JS** — Signal feed, trade panel, portfolio management
 
 ### Backend
+
 - **Python 3.14+** — Core runtime
 - **FastAPI** — REST API framework
 - **SQLAlchemy** — ORM for database models
@@ -30,6 +35,7 @@ CramerBot automatically:
 - **asyncpg** — Async PostgreSQL driver
 
 ### Database
+
 - **PostgreSQL** — Primary data store (hosted on Supabase)
 - **Tables:**
   - `tweets` — Raw scraped tweets from Jim Cramer
@@ -37,15 +43,18 @@ CramerBot automatically:
   - `user_settings` — User profiles, API keys, risk parameters
 
   ### Deployment Platforms
-- **Render** — Hosting (Python/FastAPI backend)
+
+- **Vercel** — Hosting (Python/FastAPI backend)
 - **Supabase** — PostgreSQL database & real-time subscriptions
 - **Alpaca** — Trading API (paper trading for testing, live for production)
+
+The website is deployed on Vercel: <https://cramerbot.vercel.app>
 
 ## Team Documents
 
 You may find these helpful as you work together to organize your project.
 
-- [Team Project Ideas](./docs/team_project_ideas.md)
+- [team project ideas](./docs/team_project_ideas.md)
 - [Team Decision Log](./docs/team_decision_log.md)
 
 Meeting Agenda templates (located in the `/docs` directory in this repo):
@@ -56,9 +65,11 @@ Meeting Agenda templates (located in the `/docs` directory in this repo):
 - Meeting - Sprint Open Topic Session --> ./docs/meeting-sprint_open_topic_session.docx
 
 ## Database
+
 The project uses PostgreSQL for data persistence, managed via SQLAlchemy ORM and Alembic migrations.
 
 ### Entity Relationship Diagram (ERD)
+
 ```mermaid
 erDiagram
     tweets ||--o{ tweet_sentiments : "has"
@@ -95,6 +106,7 @@ erDiagram
 ```
 
 ### Table Descriptions
+
 | Table | Description | Purpose |
 | :--- | :--- | :--- |
 | **`tweets`** | Stores historical tweet data scraped from [Jim Cramer](https://www.cnbc.com/jim-cramer-bio/)'s [X account](https://twitter.com/jimcramer). | Primary source of trading signals; indexed by timestamp to prevent duplicates. |
@@ -104,6 +116,7 @@ erDiagram
 ## Running Locally
 
 To run app locally:
+
 ```bash
 cd server
 uv sync
