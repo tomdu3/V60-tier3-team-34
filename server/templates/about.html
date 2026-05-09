@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>About - CramerBot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      background:#0b0e14;
+      color:#e5e7eb;
+      font-family: system-ui;
+      margin:0;
+    }
+
+    .container {
+      max-width:900px;
+      margin:40px auto;
+      padding:24px;
+    }
+
+    h1 {
+      font-size:28px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    h2 {
+      font-size:16px;
+      margin-bottom:12px;
+      color:#f3f4f6;
+      letter-spacing:0.2px;
+    }
+
+    p {
+      color:#9ca3af;
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    .section {
+      margin-bottom:28px;
+    }
+
+    .card {
+      background:#13161f;
+      border:1px solid #1f2937;
+      border-radius:10px;
+      padding:14px;
+    }
+
+    .card p {
+      margin:6px 0;
+    }
+
+    .code {
+      background:#13161f;
+      border:1px solid #1f2937;
+      border-radius:10px;
+      padding:12px;
+      font-family: monospace;
+      font-size:12px;
+      color:#9ca3af;
+      overflow-x:auto;
+    }
+
+    a {
+      color:#60a5fa;
+      text-decoration:none;
+    }
+
+    a:hover {
+      color:#93c5fd;
+    }
+
+    ul {
+      color:#9ca3af;
+      line-height:1.8;
+      padding-left:18px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <h1>CramerBot</h1>
+  <p>
+    A simulated trading dashboard powered by real-time sentiment signals and portfolio tracking.
+  </p>
+
+  <!-- OVERVIEW -->
+  <section class="section">
+  <h2>Overview</h2>
+
+  <p>
+    CramerBot is an AI-powered trading system that converts real-time financial commentary into structured trading signals.
+    It operates as a data pipeline that ingests tweets from Jim Cramer, processes them using large language models,
+    and translates the output into actionable market positions.
+  </p>
+
+  <div class="card">
+    <p><strong>Data Source:</strong> Tweets scraped from Jim Cramer (financial commentary)</p>
+    <p><strong>AI Processing:</strong> Sentiment and ticker extraction using Anthropic</p>
+    <p><strong>Execution Layer:</strong> Trade simulation and execution via Alpaca API</p>
+    <p><strong>Frontend:</strong> Real-time dashboard for signals, positions, and trade history</p>
+  </div>
+
+  <p>
+    This architecture enables experimentation with sentiment-driven trading strategies,
+    bridging unstructured market opinions and systematic execution.
+  </p>
+
+</section>
+
+  <!-- DATABASE -->
+  <section class="section">
+    <h2>Database Architecture</h2>
+
+    <p>
+      Built using PostgreSQL with SQLAlchemy ORM and Alembic migrations.
+    </p>
+
+    <div class="card">
+      <p><strong>tweets</strong> — Stores scraped Twitter/X data (signal source)</p>
+      <p><strong>tweet_sentiments</strong> — AI sentiment + stock extraction</p>
+      <p><strong>user_settings</strong> — User configs & trading preferences</p>
+    </div>
+  </section>
+
+  <!-- RUN LOCALLY -->
+  <section class="section">
+    <h2>Run Locally</h2>
+
+    <div class="code">
+cd server<br/>
+uv sync<br/>
+uv run uvicorn main:app
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="section">
+    <h2>Team</h2>
+
+    <ul>
+
+      <li>
+        Alex Thomas — Scrum Master —
+        <a href="https://github.com/BagelTime" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/ajt11176" target="_blank">LinkedIn</a>
+      </li>
+
+      <li>
+        Conrado Figari Vechio — Product Owner —
+        <a href="https://github.com/conradofigariv" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/conradofigarivechio/" target="_blank">LinkedIn</a>
+      </li>
+
+      <li>
+        Tomislav Dukez —
+        <a href="https://github.com/tomdu3" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/tomislav-dukez" target="_blank">LinkedIn</a>
+      </li>
+
+      <li>
+        Ndzana Christophe —
+        <a href="https://github.com/christoban" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/christophe-ndzana-6951a4316" target="_blank">LinkedIn</a>
+      </li>
+
+      <li>
+        Srikaanth Balajhi —
+        <a href="https://github.com/srikaanthtb" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/srikaanth-balajhi-4b6171131/" target="_blank">LinkedIn</a>
+      </li>
+
+      <li>
+        John Omokhagbon Ezekiel —
+        <a href="https://github.com/Sirius1616" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/john-ezekiel-dev/" target="_blank">LinkedIn</a>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- DATABASE IMPLEMENTATION PLAN -->
+  <section class="section">
+    <h2>Database Implementation Plan</h2>
+
+    <p>
+      Supabase-backed PostgreSQL system designed to persist scraped tweets, AI-generated signals,
+      and user configurations with duplicate prevention and migration support.
+    </p>
+
+    <p>
+      Key components: migrations (Alembic), local Docker Postgres, and upsert-based ingestion pipeline.
+    </p>
+  </section>
+
+</div>
+
+</body>
+</html>

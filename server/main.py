@@ -26,6 +26,11 @@ async def root():
     html_file = BASE_DIR / "templates" / "dashboard.html"
     return HTMLResponse(content=html_file.read_text())
 
+@app.get("/about", response_class=HTMLResponse)
+async def about():
+    html_file = BASE_DIR / "templates" / "about.html"
+    return HTMLResponse(content=html_file.read_text(), status_code=200)
+
 @app.get("/api/signal-feed")
 async def get_signal_feed(limit: int = Query(default=20, ge=1, le=100), ticker: str = Query(default="")):
     return read_signal_feed_from_supabase(limit, ticker)
