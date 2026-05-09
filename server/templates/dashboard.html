@@ -27,9 +27,9 @@
     </div>
     <div class="flex items-center gap-3">
       <div class="flex items-center gap-1 p-1 rounded-xl" style="background:#0f1117">
-        <button id="env-paper" onclick="setTradingEnv('paper')"
+        <button id="env-paper"
           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white">Paper</button>
-        <button id="env-live" onclick="setTradingEnv('live')"
+        <button id="env-live"
           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-gray-800 text-gray-400">Live</button>
       </div>
       <span id="account-env-label" class="text-xs font-semibold text-blue-300">PAPER</span>
@@ -48,8 +48,7 @@
           <span id="signal-count" class="text-xs text-gray-500">0 signals</span>
         </div>
         <input id="ticker-filter" type="text" placeholder="Filter by ticker (e.g. AAPL)"
-          class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500"
-          oninput="debounceLoadSignals()" />
+          class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500" />
       </div>
       <div id="signal-feed" class="flex-1 overflow-y-auto p-4 space-y-1"></div>
     </div>
@@ -90,11 +89,11 @@
           </div>
           <div class="flex gap-2 items-center">
             <div class="flex gap-2">
-              <button onclick="loadChart(30)" id="btn-30" class="px-3 py-1 text-xs rounded-lg bg-blue-600 text-white">30D</button>
-              <button onclick="loadChart(60)" id="btn-60" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">60D</button>
-              <button onclick="loadChart(90)" id="btn-90" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">90D</button>
+              <button data-chart-days="30" id="btn-30" class="px-3 py-1 text-xs rounded-lg bg-blue-600 text-white">30D</button>
+              <button data-chart-days="60" id="btn-60" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">60D</button>
+              <button data-chart-days="90" id="btn-90" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">90D</button>
             </div>
-            <button onclick="toggleChartExpand()"
+            <button data-chart-toggle
               class="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 transition"
               title="Expand chart">
               <svg id="chart-expand-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,10 +109,10 @@
       <div class="rounded-xl border border-gray-800 p-5" style="background:#1a1d27">
         <h2 class="font-semibold mb-4">Trade History</h2>
         <div class="flex gap-4 border-b border-gray-700 mb-4">
-          <button onclick="filterTrades('All')" id="tab-All" class="pb-2 text-sm tab-active">All</button>
-          <button onclick="filterTrades('FILLED')" id="tab-FILLED" class="pb-2 text-sm text-gray-500 hover:text-white">Filled</button>
-          <button onclick="filterTrades('PENDING')" id="tab-PENDING" class="pb-2 text-sm text-gray-500 hover:text-white">Pending</button>
-          <button onclick="filterTrades('CANCELED')" id="tab-CANCELED" class="pb-2 text-sm text-gray-500 hover:text-white">Cancelled</button>
+          <button data-trade-filter="All" id="tab-All" class="pb-2 text-sm tab-active">All</button>
+          <button data-trade-filter="FILLED" id="tab-FILLED" class="pb-2 text-sm text-gray-500 hover:text-white">Filled</button>
+          <button data-trade-filter="PENDING" id="tab-PENDING" class="pb-2 text-sm text-gray-500 hover:text-white">Pending</button>
+          <button data-trade-filter="CANCELED" id="tab-CANCELED" class="pb-2 text-sm text-gray-500 hover:text-white">Cancelled</button>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -141,7 +140,7 @@
       <div class="p-4 border-b border-gray-800">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold text-sm">Open Positions</h2>
-          <button id="close-all-button" onclick="closeAllPositions()" class="text-xs text-red-400 hover:text-red-300">Close All</button>
+          <button id="close-all-button" class="text-xs text-red-400 hover:text-red-300">Close All</button>
         </div>
         <div id="positions-list" class="space-y-3"></div>
       </div>
@@ -151,11 +150,11 @@
 
         <!-- Mode Switcher -->
         <div class="grid grid-cols-2 gap-1 p-1 rounded-xl" style="background:#0f1117">
-          <button id="mode-manual" onclick="setMode('manual')"
+          <button id="mode-manual" data-mode="manual"
             class="py-2 rounded-lg text-sm font-medium transition mode-tab-active">
             Manual
           </button>
-          <button id="mode-auto" onclick="setMode('auto')"
+          <button id="mode-auto" data-mode="auto"
             class="py-2 rounded-lg text-sm font-medium transition mode-tab-inactive">
             Automatic
           </button>
@@ -171,18 +170,18 @@
           <div class="mb-3">
             <label class="text-xs text-gray-500 mb-1 block">Side</label>
             <div class="grid grid-cols-2 gap-2">
-              <button id="side-buy" onclick="setSide('BUY')"
+              <button id="side-buy" data-side="BUY"
                 class="py-2 rounded-lg text-sm font-medium bg-green-700 text-green-100">BUY</button>
-              <button id="side-sell" onclick="setSide('SELL')"
+              <button id="side-sell" data-side="SELL"
                 class="py-2 rounded-lg text-sm font-medium bg-gray-700 text-gray-400">SELL</button>
             </div>
           </div>
           <div class="mb-3">
             <label class="text-xs text-gray-500 mb-1 block">Order Type</label>
             <div class="grid grid-cols-2 gap-2">
-              <button id="type-market" onclick="setOrderType('Market')"
+              <button id="type-market" data-order-type="Market"
                 class="py-2 rounded-lg text-sm bg-blue-700 text-white">Market</button>
-              <button id="type-limit" onclick="setOrderType('Limit')"
+              <button id="type-limit" data-order-type="Limit"
                 class="py-2 rounded-lg text-sm bg-gray-700 text-gray-400">Limit</button>
             </div>
           </div>
@@ -197,11 +196,11 @@
               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
           </div>
           <div class="grid grid-cols-2 gap-2">
-            <button id="trade-confirm-button" onclick="confirmTrade()"
+            <button id="trade-confirm-button"
               class="py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition">
               Confirm
             </button>
-            <button onclick="dismissTrade()"
+            <button id="trade-dismiss-button"
               class="py-2.5 rounded-lg text-sm font-semibold bg-gray-700 hover:bg-gray-600 text-gray-300 transition">
               Dismiss
             </button>
@@ -218,7 +217,7 @@
               <p class="text-sm font-medium text-white">Auto Trading</p>
               <p id="auto-status-label" class="text-xs text-gray-500 mt-0.5">Bot is paused</p>
             </div>
-            <button id="auto-toggle" onclick="toggleAutoBot()"
+            <button id="auto-toggle"
               class="relative w-11 h-6 rounded-full transition toggle-off focus:outline-none">
               <span id="auto-knob"
                 class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"></span>
@@ -249,7 +248,7 @@
               <input id="auto-maxshares" type="number" value="50" min="1"
                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
             </div>
-            <button onclick="saveAutoSettings()"
+            <button id="auto-save-button"
               class="w-full py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition">
               Save Rules
             </button>
@@ -277,11 +276,11 @@
         </div>
         <div class="flex gap-2 items-center">
           <div class="flex gap-2">
-            <button onclick="loadChart(30)" id="btn-30-exp" class="px-3 py-1 text-xs rounded-lg bg-blue-600 text-white">30D</button>
-            <button onclick="loadChart(60)" id="btn-60-exp" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">60D</button>
-            <button onclick="loadChart(90)" id="btn-90-exp" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">90D</button>
+            <button data-chart-days="30" id="btn-30-exp" class="px-3 py-1 text-xs rounded-lg bg-blue-600 text-white">30D</button>
+            <button data-chart-days="60" id="btn-60-exp" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">60D</button>
+            <button data-chart-days="90" id="btn-90-exp" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">90D</button>
           </div>
-          <button onclick="toggleChartExpand()"
+          <button data-chart-toggle
             class="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 transition"
             title="Collapse chart">
             <svg id="chart-collapse-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,573 +293,7 @@
     </div>
   </div>
 
-  <script>
-    // ── State ─────────────────────────────────────────────
-    let equityChart = null;
-    let equityChartExpanded = null;
-    let allTrades = [];
-    let currentFilter = 'All';
-    let tradeSide = 'BUY';
-    let tradeType = 'Market';
-    let autoEnabled = false;
-    let currentMode = 'manual';
-    let chartExpanded = false;
-    let currentChartDays = 30;
-    let currentTradingEnv = localStorage.getItem('tradingEnv') === 'live' ? 'live' : 'paper';
-    let tradeRequestPending = false;
-
-    function fmt(n) {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
-    }
-
-    function envLabel() {
-      return currentTradingEnv.toUpperCase();
-    }
-
-    function apiUrl(path, params = {}) {
-      const query = new URLSearchParams({ ...params, env: currentTradingEnv });
-      return path + '?' + query.toString();
-    }
-
-    async function readApiResponse(res) {
-      const contentType = res.headers.get('content-type') || '';
-      const data = contentType.includes('application/json') ? await res.json() : await res.text();
-      if (!res.ok) {
-        const detail = typeof data === 'string' ? data : data.detail || data.message || JSON.stringify(data);
-        throw new Error(detail);
-      }
-      return data;
-    }
-
-    function setTradingEnv(env) {
-      if (env === currentTradingEnv) return;
-      if (env === 'live' && !confirm('Switch to LIVE Alpaca account? Account data and trade actions will use real-money live trading.')) {
-        updateTradingEnvUi();
-        return;
-      }
-      currentTradingEnv = env;
-      localStorage.setItem('tradingEnv', currentTradingEnv);
-      updateTradingEnvUi();
-      refreshAccountData();
-    }
-
-    function updateTradingEnvUi() {
-      const isLive = currentTradingEnv === 'live';
-      document.getElementById('env-paper').className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition ' + (!isLive ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400');
-      document.getElementById('env-live').className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition ' + (isLive ? 'bg-red-700 text-white' : 'bg-gray-800 text-gray-400');
-      const label = document.getElementById('account-env-label');
-      label.textContent = envLabel();
-      label.className = 'text-xs font-semibold ' + (isLive ? 'text-red-300' : 'text-blue-300');
-    }
-
-    function setTradePending(isPending) {
-      tradeRequestPending = isPending;
-      document.getElementById('trade-confirm-button').disabled = isPending;
-      document.getElementById('trade-confirm-button').classList.toggle('opacity-60', isPending);
-      document.getElementById('close-all-button').disabled = isPending;
-      document.getElementById('close-all-button').classList.toggle('opacity-60', isPending);
-    }
-
-    function showTradeMessage(message, isError = false) {
-      const msg = document.getElementById('trade-msg');
-      msg.textContent = message;
-      msg.className = 'text-xs text-center mt-2 ' + (isError ? 'text-red-400' : 'text-green-400');
-    }
-
-    async function refreshAccountData() {
-      await Promise.all([
-        loadStats(),
-        loadChart(currentChartDays),
-        loadTradeHistory(),
-        loadPositions()
-      ]);
-    }
-
-    // ── Chart Expand/Collapse ──────────────────────────────
-    function toggleChartExpand() {
-      chartExpanded = !chartExpanded;
-      const modal = document.getElementById('chart-modal');
-      if (chartExpanded) {
-        modal.classList.remove('hidden');
-        setTimeout(() => { loadChartExpanded(currentChartDays); }, 100);
-      } else {
-        modal.classList.add('hidden');
-      }
-    }
-
-    // ── Mode Toggle ────────────────────────────────────────
-    function setMode(mode) {
-      currentMode = mode;
-      const isManual = mode === 'manual';
-      document.getElementById('panel-manual').classList.toggle('hidden', !isManual);
-      document.getElementById('panel-auto').classList.toggle('hidden', isManual);
-      document.getElementById('mode-manual').className = 'py-2 rounded-lg text-sm font-medium transition ' + (isManual ? 'mode-tab-active' : 'mode-tab-inactive');
-      document.getElementById('mode-auto').className = 'py-2 rounded-lg text-sm font-medium transition ' + (!isManual ? 'mode-tab-active' : 'mode-tab-inactive');
-    }
-
-    // ── Auto Bot Toggle ────────────────────────────────────
-    function toggleAutoBot() {
-      autoEnabled = !autoEnabled;
-      const toggle = document.getElementById('auto-toggle');
-      const knob = document.getElementById('auto-knob');
-      const label = document.getElementById('auto-status-label');
-      if (autoEnabled) {
-        toggle.classList.replace('toggle-off', 'toggle-on');
-        knob.style.transform = 'translateX(20px)';
-        label.textContent = 'Bot is active';
-        label.className = 'text-xs text-green-400 mt-0.5';
-      } else {
-        toggle.classList.replace('toggle-on', 'toggle-off');
-        knob.style.transform = 'translateX(0)';
-        label.textContent = 'Bot is paused';
-        label.className = 'text-xs text-gray-500 mt-0.5';
-      }
-    }
-
-    function saveAutoSettings() {
-      const tp = document.getElementById('auto-tp').value;
-      const sl = document.getElementById('auto-sl').value;
-      const max = document.getElementById('auto-maxshares').value;
-      const msg = document.getElementById('auto-msg');
-      msg.textContent = `Rules saved: TP ${tp}% / SL ${sl}% / Max ${max} shares`;
-      msg.className = 'text-xs text-center text-green-400';
-      setTimeout(() => { msg.textContent = ''; }, 3000);
-    }
-
-    // ── Stats Bar ──────────────────────────────────────────
-    async function loadStats() {
-      try {
-        const res = await fetch(apiUrl('/api/account-stats'));
-        const d = await readApiResponse(res);
-        document.getElementById('stat-equity').textContent = fmt(d.total_equity);
-        const pnlEl = document.getElementById('stat-pnl');
-        pnlEl.textContent = fmt(d.daily_pnl);
-        pnlEl.className = 'text-xl font-bold ' + (d.daily_pnl >= 0 ? 'text-green-400' : 'text-red-400');
-        document.getElementById('stat-pnl-pct').textContent = (d.daily_pnl >= 0 ? '+' : '') + d.daily_pnl_pct.toFixed(2) + '% today';
-        document.getElementById('stat-cash').textContent = fmt(d.cash_balance);
-        document.getElementById('stat-winrate').textContent = d.win_rate.toFixed(1) + '%';
-      } catch (e) {
-        console.error('Stats error:', e);
-        document.getElementById('stat-equity').textContent = '—';
-        document.getElementById('stat-pnl').textContent = '—';
-        document.getElementById('stat-pnl-pct').textContent = e.message;
-        document.getElementById('stat-cash').textContent = '—';
-        document.getElementById('stat-winrate').textContent = '—';
-      }
-    }
-
-    // ── Chart Helper ───────────────────────────────────────
-    function createEquityChart(canvasId, data) {
-      const first = data.values[0], last = data.values[data.values.length - 1];
-      const change = last - first, changePct = ((change / first) * 100).toFixed(2);
-      const isPositive = change >= 0;
-      const color = isPositive ? '#34d399' : '#f87171';
-      
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) return null;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return null;
-
-      const existingChart = canvasId === 'equityChart' ? equityChart : equityChartExpanded;
-      if (existingChart) existingChart.destroy();
-
-      return new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: data.labels,
-          datasets: [{
-            data: data.values,
-            borderColor: color,
-            backgroundColor: color + '22',
-            fill: true,
-            tension: 0.4,
-            pointRadius: 0,
-            borderWidth: 2,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: canvasId === 'equityChart',
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { color: '#1e2330' }, ticks: { color: '#6b7280', maxTicksLimit: 8 } },
-            y: { grid: { color: '#1e2330' }, ticks: { color: '#6b7280', callback: v => '$' + (v/1000).toFixed(0) + 'k' } }
-          }
-        }
-      });
-    }
-
-    // ── Chart ──────────────────────────────────────────────
-    async function loadChart(days) {
-      currentChartDays = days;
-      ['30','60','90'].forEach(d => {
-        document.getElementById('btn-' + d)?.classList.replace(...(d == days ? ['bg-gray-700', 'text-gray-400'] : ['bg-blue-600', 'text-white']));
-        document.getElementById('btn-' + d).className = 'px-3 py-1 text-xs rounded-lg ' + (d == days ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600');
-        document.getElementById('btn-' + d + '-exp')?.classList.replace(...(d == days ? ['bg-gray-700', 'text-gray-400'] : ['bg-blue-600', 'text-white']));
-        if (document.getElementById('btn-' + d + '-exp')) {
-          document.getElementById('btn-' + d + '-exp').className = 'px-3 py-1 text-xs rounded-lg ' + (d == days ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600');
-        }
-      });
-      try {
-        const res = await fetch(apiUrl('/api/account-equity', { days }));
-        const data = await readApiResponse(res);
-        const first = data.values[0], last = data.values[data.values.length - 1];
-        const change = last - first, changePct = ((change / first) * 100).toFixed(2);
-        const isPositive = change >= 0;
-        const changeHtml = `<span class="${isPositive ? 'text-green-400' : 'text-red-400'}">${isPositive ? '+' : ''}${fmt(change)} (${changePct}%)</span>`;
-        document.getElementById('equity-change').innerHTML = changeHtml;
-        if (document.getElementById('equity-change-expanded')) {
-          document.getElementById('equity-change-expanded').innerHTML = changeHtml;
-        }
-        equityChart = createEquityChart('equityChart', data);
-        if (chartExpanded) {
-          equityChartExpanded = createEquityChart('equityChartExpanded', data);
-        }
-      } catch (e) {
-        console.error('Chart error:', e);
-        document.getElementById('equity-change').textContent = e.message;
-      }
-    }
-
-    async function loadChartExpanded(days) {
-      try {
-        const res = await fetch(apiUrl('/api/account-equity', { days }));
-        const data = await readApiResponse(res);
-        const first = data.values[0], last = data.values[data.values.length - 1];
-        const change = last - first, changePct = ((change / first) * 100).toFixed(2);
-        const isPositive = change >= 0;
-        const changeHtml = `<span class="${isPositive ? 'text-green-400' : 'text-red-400'}">${isPositive ? '+' : ''}${fmt(change)} (${changePct}%)</span>`;
-        document.getElementById('equity-change-expanded').innerHTML = changeHtml;
-        equityChartExpanded = createEquityChart('equityChartExpanded', data);
-      } catch (e) {
-        console.error('Expanded chart error:', e);
-        document.getElementById('equity-change-expanded').textContent = e.message;
-      }
-    }
-
-    // ── Signal Feed ────────────────────────────────────────
-    let signalTimer = null;
-    function debounceLoadSignals() {
-      clearTimeout(signalTimer);
-      signalTimer = setTimeout(loadSignals, 400);
-    }
-
-    async function loadSignals() {
-      const ticker = document.getElementById('ticker-filter').value.trim();
-      const url = '/api/signal-feed?limit=30' + (ticker ? '&ticker=' + encodeURIComponent(ticker) : '');
-      try {
-        const res = await fetch(url);
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(errorText || 'Signal feed request failed');
-        }
-        const tweets = await res.json();
-        document.getElementById('signal-count').textContent = tweets.length + ' signals';
-        const feed = document.getElementById('signal-feed');
-        feed.innerHTML = tweets.length === 0
-          ? '<p class="text-xs text-gray-600 text-center mt-8">No signals found</p>'
-          : tweets.map(t => {
-              const tickers = Array.isArray(t.stock_tickers) ? t.stock_tickers.slice(0, 3) : [];
-              const isBearish = t.sentiment === 'bearish';
-              const isBullish = t.sentiment === 'bullish';
-              const badgeClass = isBearish ? 'badge-buy' : isBullish ? 'badge-sell' : 'bg-gray-700 text-gray-300 border border-gray-500';
-              const badgeText = isBearish ? 'BEARISH' : isBullish ? 'BULLISH' : 'NEUTRAL';
-              const tickerBadges = tickers.map(tk => `<span class="text-xs font-mono font-bold text-blue-300">${tk}</span>`).join(' ');
-              const primaryTicker = tickers.length > 0 ? tickers[0] : '';
-              const confidenceScore = Number(t.confidence_score) || 0;
-              const confidencePercent = (confidenceScore * 100).toFixed(1);
-              const actionText = t.inverse_action || 'HOLD';
-              const actionClass = actionText === 'BUY' ? 'text-green-400' : actionText === 'SELL' ? 'text-red-400' : 'text-gray-400';
-              return `<div class="signal-item">
-                <div class="flex items-center justify-between mb-1">
-                  <div class="flex gap-1">${tickerBadges || '<span class="text-xs text-gray-600">General</span>'}</div>
-                  <span class="text-xs px-1.5 py-0.5 rounded font-medium ${badgeClass}">${badgeText}</span>
-                </div>
-                <p class="text-xs text-gray-400 leading-relaxed line-clamp-3 mb-2">${t.tweet_text || ''}</p>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs text-gray-500">Confidence: ${confidencePercent}%</span>
-                  <span class="text-xs font-bold ${actionClass}">→ ${actionText}</span>
-                </div>
-                <div class="flex gap-1.5">
-                  ${primaryTicker && t.inverse_action ? `<button onclick="tradeFromSignal('${primaryTicker}', '${t.inverse_action}')" class="flex-1 py-1.5 rounded text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white transition">Trade</button>` : ''}
-                  ${t.tweet_link ? `<a href="${t.tweet_link}" target="_blank" class="flex-1 py-1.5 rounded text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 transition text-center">View</a>` : ''}
-                </div>
-              </div>`;
-            }).join('');
-      } catch (e) {
-        console.error('Signal feed error:', e);
-        document.getElementById('signal-count').textContent = '0 signals';
-        document.getElementById('signal-feed').innerHTML = '<p class="text-xs text-red-400 text-center mt-8">Signal feed unavailable</p>';
-      }
-    }
-
-    function tradeFromSignal(ticker, side) {
-      document.getElementById('trade-ticker').value = ticker.toUpperCase();
-      setSide(side);
-      setMode('manual');
-      document.getElementById('trade-ticker').focus();
-    }
-
-    // ── Trade History ──────────────────────────────────────
-    async function loadTradeHistory() {
-      try {
-        const res = await fetch(apiUrl('/api/trade-history', { limit: 50 }));
-        allTrades = await readApiResponse(res);
-        renderTrades();
-      } catch (e) {
-        console.error('Trade history error:', e);
-        allTrades = [];
-        renderTrades();
-      }
-    }
-
-    function filterTrades(status) {
-      currentFilter = status;
-      document.querySelectorAll('[id^="tab-"]').forEach(el => {
-        el.className = 'pb-2 text-sm ' + (el.id === 'tab-' + status ? 'tab-active' : 'text-gray-500 hover:text-white');
-      });
-      renderTrades();
-    }
-
-    function renderTrades() {
-      const trades = currentFilter === 'All' ? allTrades : allTrades.filter(t => t.status === currentFilter);
-      const statusClass = { FILLED: 'badge-filled', NEW: 'badge-pending', PENDING: 'badge-pending', CANCELED: 'badge-cancelled' };
-      const tbody = document.getElementById('trade-history-body');
-      tbody.innerHTML = trades.length === 0
-        ? `<tr><td colspan="7" class="py-6 text-center text-xs text-gray-600">No trades found</td></tr>`
-        : trades.map(t => {
-          const canCancel = t.status === 'NEW' && t.id;
-          return `
-          <tr class="text-sm hover:bg-gray-800 transition">
-            <td class="py-2.5 font-mono font-bold text-white">${t.ticker}</td>
-            <td class="py-2.5"><span class="px-2 py-0.5 rounded text-xs font-medium ${t.side === 'BUY' ? 'badge-buy' : 'badge-sell'}">${t.side}</span></td>
-            <td class="py-2.5"><span class="px-2 py-0.5 rounded text-xs ${statusClass[t.status] || ''}">${t.status}</span></td>
-            <td class="py-2.5 text-right text-gray-300">${t.qty}</td>
-            <td class="py-2.5 text-right text-gray-300">${fmt(t.price)}</td>
-            <td class="py-2.5 text-right text-gray-500 text-xs">${t.time}</td>
-            <td class="py-2.5 text-right">${canCancel ? `<button onclick="cancelOrder('${t.id}', '${t.ticker}')" class="px-2 py-1 rounded text-xs font-medium bg-red-900 hover:bg-red-800 text-red-300 transition">Cancel</button>` : '<span class="text-xs text-gray-600">—</span>'}</td>
-          </tr>`;
-        }).join('');
-    }
-
-    async function cancelOrder(orderId, ticker) {
-      if (tradeRequestPending) return;
-      if (!confirm('Cancel open order for ' + ticker + '?')) return;
-      setTradePending(true);
-      try {
-        const res = await fetch('/api/orders/cancel', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ order_id: orderId, env: currentTradingEnv })
-        });
-        const d = await readApiResponse(res);
-        showTradeMessage(d.message || 'Order cancel submitted.');
-        await refreshAccountData();
-      } catch (e) {
-        console.error('Cancel order error:', e);
-        showTradeMessage(e.message, true);
-      } finally {
-        setTradePending(false);
-      }
-    }
-
-    // ── Positions ──────────────────────────────────────────
-    async function loadPositions() {
-      try {
-        const res = await fetch(apiUrl('/api/positions'));
-        const positions = await readApiResponse(res);
-
-        const list = document.getElementById('positions-list');
-        list.innerHTML = positions.length === 0
-          ? '<p class="text-xs text-gray-600 text-center">No open positions</p>'
-          : positions.map(p => {
-              const isPos = p.pnl >= 0;
-              return `<div class="rounded-lg border border-gray-700 p-3" style="background:#0f1117">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="font-mono font-bold text-white">${p.ticker}</span>
-                  <span class="text-xs px-2 py-0.5 rounded font-medium ${isPos ? 'badge-buy' : 'badge-sell'}">${isPos ? '+' : ''}${p.pnl_pct.toFixed(2)}%</span>
-                </div>
-                <div class="grid grid-cols-2 gap-1 text-xs text-gray-400 mb-2">
-                  <span>${p.shares} shares</span>
-                  <span class="text-right">${isPos ? '+' : ''}${fmt(p.pnl)}</span>
-                  <span>Avg ${fmt(p.avg_price)}</span>
-                  <span class="text-right">Mkt ${fmt(p.market_price)}</span>
-                </div>
-                <button onclick="closePosition('${p.ticker}')"
-                  class="w-full py-1.5 rounded text-xs font-medium bg-red-900 hover:bg-red-800 text-red-300 transition">
-                  Close Position
-                </button>
-              </div>`;
-            }).join('');
-
-        const autoList = document.getElementById('auto-positions-list');
-        autoList.innerHTML = positions.length === 0
-          ? '<p class="text-xs text-gray-600 text-center">No open positions</p>'
-          : positions.map(p => {
-              const isPos = p.pnl >= 0;
-              return `<div class="rounded-lg border border-gray-700 p-3 flex flex-col gap-2" style="background:#13161f">
-                <div class="flex items-center justify-between">
-                  <span class="font-mono font-bold text-sm text-white">${p.ticker}</span>
-                  <span class="text-xs font-medium ${isPos ? 'text-green-400' : 'text-red-400'}">${isPos ? '+' : ''}${p.pnl_pct.toFixed(2)}%</span>
-                </div>
-                <p class="text-xs text-gray-500">${p.shares} shares &middot; P&L: <span class="${isPos ? 'text-green-400' : 'text-red-400'}">${isPos ? '+' : ''}${fmt(p.pnl)}</span></p>
-                <div class="grid grid-cols-2 gap-2">
-                  <button onclick="takeProfitPosition('${p.ticker}')"
-                    class="py-1.5 rounded text-xs font-medium bg-green-900 hover:bg-green-800 text-green-300 transition">
-                    Take Profit
-                  </button>
-                  <button onclick="dismissPosition('${p.ticker}')"
-                    class="py-1.5 rounded text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 transition">
-                    Dismiss
-                  </button>
-                </div>
-              </div>`;
-            }).join('');
-      } catch (e) {
-        console.error('Positions error:', e);
-        document.getElementById('positions-list').innerHTML = '<p class="text-xs text-red-400 text-center">' + e.message + '</p>';
-        document.getElementById('auto-positions-list').innerHTML = '<p class="text-xs text-red-400 text-center">' + e.message + '</p>';
-      }
-    }
-
-    async function closePosition(ticker) {
-      if (tradeRequestPending) return;
-      if (!confirm('Close position for ' + ticker + '?')) return;
-      setTradePending(true);
-      try {
-        const res = await fetch('/api/positions/close', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticker, env: currentTradingEnv })
-        });
-        const d = await readApiResponse(res);
-        showTradeMessage(d.message || 'Position close submitted.');
-        await refreshAccountData();
-      } catch (e) {
-        console.error('Close error:', e);
-        showTradeMessage(e.message, true);
-      } finally {
-        setTradePending(false);
-      }
-    }
-
-    async function closeAllPositions() {
-      if (tradeRequestPending) return;
-      if (!confirm('Close all open positions in ' + envLabel() + '?')) return;
-      setTradePending(true);
-      try {
-        const res = await fetch('/api/positions/close-all', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ env: currentTradingEnv })
-        });
-        const d = await readApiResponse(res);
-        showTradeMessage(d.message || 'Close-all request submitted.');
-        await refreshAccountData();
-      } catch (e) {
-        console.error('Close all error:', e);
-        showTradeMessage(e.message, true);
-      } finally {
-        setTradePending(false);
-      }
-    }
-
-    async function takeProfitPosition(ticker) {
-      if (tradeRequestPending) return;
-      if (!confirm('Take profit on ' + ticker + '?')) return;
-      setTradePending(true);
-      try {
-        const res = await fetch('/api/positions/close', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticker, reason: 'take_profit', env: currentTradingEnv })
-        });
-        const d = await readApiResponse(res);
-        showTradeMessage(d.message || 'Take-profit close submitted.');
-        await refreshAccountData();
-      } catch (e) {
-        console.error('Take profit error:', e);
-        showTradeMessage(e.message, true);
-      } finally {
-        setTradePending(false);
-      }
-    }
-
-    function dismissPosition(ticker) {
-      loadPositions();
-    }
-
-    // ── Manual Trade Execution ─────────────────────────────
-    function setSide(side) {
-      tradeSide = side;
-      document.getElementById('side-buy').className = 'py-2 rounded-lg text-sm font-medium ' + (side === 'BUY' ? 'bg-green-700 text-green-100' : 'bg-gray-700 text-gray-400');
-      document.getElementById('side-sell').className = 'py-2 rounded-lg text-sm font-medium ' + (side === 'SELL' ? 'bg-red-700 text-red-100' : 'bg-gray-700 text-gray-400');
-    }
-
-    function setOrderType(type) {
-      tradeType = type;
-      document.getElementById('type-market').className = 'py-2 rounded-lg text-sm ' + (type === 'Market' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-400');
-      document.getElementById('type-limit').className = 'py-2 rounded-lg text-sm ' + (type === 'Limit' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-400');
-      document.getElementById('limit-price-row').classList.toggle('hidden', type !== 'Limit');
-    }
-
-    async function confirmTrade() {
-      if (tradeRequestPending) return;
-      const ticker = document.getElementById('trade-ticker').value.trim().toUpperCase();
-      const shares = document.getElementById('trade-shares').value;
-      const limitPrice = document.getElementById('trade-limit-price').value;
-      if (!ticker || !shares) {
-        showTradeMessage('Fill in ticker and shares.', true);
-        return;
-      }
-      if (tradeType === 'Limit' && !limitPrice) {
-        showTradeMessage('Fill in limit price for limit orders.', true);
-        return;
-      }
-      setTradePending(true);
-      showTradeMessage('Submitting order...');
-      try {
-        const res = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            env: currentTradingEnv,
-            ticker,
-            side: tradeSide,
-            order_type: tradeType,
-            qty: shares,
-            limit_price: tradeType === 'Limit' ? limitPrice : null
-          })
-        });
-        const d = await readApiResponse(res);
-        showTradeMessage(d.message || `Order submitted: ${tradeSide} ${shares} ${ticker} @ ${tradeType}`);
-        await refreshAccountData();
-      } catch (e) {
-        console.error('Order error:', e);
-        showTradeMessage(e.message, true);
-      } finally {
-        setTradePending(false);
-      }
-    }
-
-    function dismissTrade() {
-      document.getElementById('trade-ticker').value = '';
-      document.getElementById('trade-shares').value = '';
-      document.getElementById('trade-limit-price').value = '';
-      document.getElementById('trade-msg').textContent = '';
-      tradeSide = 'BUY'; tradeType = 'Market';
-      setSide('BUY'); setOrderType('Market');
-    }
-
-    // ── Init ───────────────────────────────────────────────
-    updateTradingEnvUi();
-    refreshAccountData();
-    loadSignals();
-    setInterval(loadSignals, 60000);
-    setInterval(loadStats, 30000);
-    setInterval(loadPositions, 30000);
-  </script>
+  <script type="module" src="/static/js/dashboard/main.js"></script>
 
 </body>
 <footer class="mt-10 border-t border-gray-800 bg-[#0b0e14]">
