@@ -13,7 +13,7 @@
 <body class="min-h-screen">
 
   <!-- Navbar -->
-  <nav class="flex items-center justify-between px-6 py-3 border-b border-gray-800" style="background:#13161f">
+  <nav class="dashboard-shell flex items-center justify-between px-6 py-3 border-b border-gray-800">
     <div class="flex items-center gap-3">
       <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm">CB</div>
       <span class="font-bold text-lg tracking-wide">CRAMERBOT</span>
@@ -26,7 +26,7 @@
       <a href="#" class="hover:text-white transition">Settings</a>
     </div>
     <div class="flex items-center gap-3">
-      <div class="flex items-center gap-1 p-1 rounded-xl" style="background:#0f1117">
+      <div class="dashboard-inset flex items-center gap-1 p-1 rounded-xl">
         <button id="env-paper"
           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white">Paper</button>
         <button id="env-live"
@@ -41,7 +41,7 @@
   <div class="flex h-[calc(100vh-57px)]">
 
     <!-- LEFT: Signal Feed -->
-    <div class="w-64 border-r border-gray-800 flex flex-col" style="background:#13161f">
+    <div class="dashboard-shell w-64 border-r border-gray-800 flex flex-col">
       <div class="p-4 border-b border-gray-800">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold text-sm">Live Signal Feed</h2>
@@ -81,7 +81,7 @@
       </div>
 
       <!-- Chart -->
-      <div class="rounded-xl border border-gray-800 p-5" style="background:#1a1d27">
+      <div class="dashboard-surface rounded-xl border border-gray-800 p-5">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h2 class="font-semibold">Account Equity</h2>
@@ -106,7 +106,7 @@
       </div>
 
       <!-- Trade History -->
-      <div class="rounded-xl border border-gray-800 p-5" style="background:#1a1d27">
+      <div class="dashboard-surface rounded-xl border border-gray-800 p-5">
         <h2 class="font-semibold mb-4">Trade History</h2>
         <div class="flex gap-4 border-b border-gray-700 mb-4">
           <button data-trade-filter="All" id="tab-All" class="pb-2 text-sm tab-active">All</button>
@@ -134,7 +134,7 @@
     </div>
 
     <!-- RIGHT: Positions + Trade Panel -->
-    <div class="w-80 border-l border-gray-800 flex flex-col overflow-y-auto" style="background:#13161f">
+    <div class="dashboard-shell w-80 border-l border-gray-800 flex flex-col overflow-y-auto">
 
       <!-- Open Positions -->
       <div class="p-4 border-b border-gray-800">
@@ -149,7 +149,7 @@
       <div class="p-4 flex flex-col gap-4">
 
         <!-- Mode Switcher -->
-        <div class="grid grid-cols-2 gap-1 p-1 rounded-xl" style="background:#0f1117">
+        <div class="dashboard-inset grid grid-cols-2 gap-1 p-1 rounded-xl">
           <button id="mode-manual" data-mode="manual"
             class="py-2 rounded-lg text-sm font-medium transition mode-tab-active">
             Manual
@@ -212,7 +212,7 @@
         <div id="panel-auto" class="hidden flex flex-col gap-4">
 
           <!-- Bot Status -->
-          <div class="rounded-xl border border-gray-700 p-3 flex items-center justify-between" style="background:#0f1117">
+          <div class="dashboard-inset rounded-xl border border-gray-700 p-3 flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-white">Auto Trading</p>
               <p id="auto-status-label" class="text-xs text-gray-500 mt-0.5">Bot is paused</p>
@@ -225,7 +225,7 @@
           </div>
 
           <!-- Rules -->
-          <div class="rounded-xl border border-gray-700 p-3 flex flex-col gap-3" style="background:#0f1117">
+          <div class="dashboard-inset rounded-xl border border-gray-700 p-3 flex flex-col gap-3">
             <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Rules</p>
             <div>
               <label class="text-xs text-gray-400 mb-1 block">Take Profit %</label>
@@ -256,7 +256,7 @@
           </div>
 
           <!-- Quick Actions on Open Positions -->
-          <div class="rounded-xl border border-gray-700 p-3" style="background:#0f1117">
+          <div class="dashboard-inset rounded-xl border border-gray-700 p-3">
             <p class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-3">Quick Actions</p>
             <div id="auto-positions-list" class="space-y-2"></div>
           </div>
@@ -268,7 +268,7 @@
 
   <!-- Expanded Chart Modal -->
   <div id="chart-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-    <div class="w-full h-full max-w-6xl max-h-[90vh] rounded-xl border border-gray-700 p-6 flex flex-col" style="background:#1a1d27">
+    <div class="dashboard-surface w-full h-full max-w-6xl max-h-[90vh] rounded-xl border border-gray-700 p-6 flex flex-col">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="font-semibold text-lg">Account Equity - Full View</h2>

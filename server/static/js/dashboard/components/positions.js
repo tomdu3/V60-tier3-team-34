@@ -45,7 +45,7 @@ function renderPositions(positions) {
     ? '<p class="text-xs text-gray-600 text-center">No open positions</p>'
     : positions.map((p) => {
       const isPos = p.pnl >= 0;
-      return `<div class="rounded-lg border border-gray-700 p-3" style="background:#0f1117">
+      return `<div class="dashboard-inset rounded-lg border border-gray-700 p-3">
         <div class="flex items-center justify-between mb-2">
           <span class="font-mono font-bold text-white">${escapeHtml(p.ticker)}</span>
           <span class="text-xs px-2 py-0.5 rounded font-medium ${isPos ? 'badge-buy' : 'badge-sell'}">${isPos ? '+' : ''}${Number(p.pnl_pct).toFixed(2)}%</span>
@@ -69,7 +69,7 @@ function renderAutoPositions(positions) {
     ? '<p class="text-xs text-gray-600 text-center">No open positions</p>'
     : positions.map((p) => {
       const isPos = p.pnl >= 0;
-      return `<div class="rounded-lg border border-gray-700 p-3 flex flex-col gap-2" style="background:#13161f">
+      return `<div class="dashboard-shell rounded-lg border border-gray-700 p-3 flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <span class="font-mono font-bold text-sm text-white">${escapeHtml(p.ticker)}</span>
           <span class="text-xs font-medium ${isPos ? 'text-green-400' : 'text-red-400'}">${isPos ? '+' : ''}${Number(p.pnl_pct).toFixed(2)}%</span>

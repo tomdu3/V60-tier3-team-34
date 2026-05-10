@@ -36,6 +36,18 @@ body {
   border-bottom: none;
 }
 
+.dashboard-shell {
+  background: #13161f;
+}
+
+.dashboard-surface {
+  background: #1a1d27;
+}
+
+.dashboard-inset {
+  background: #0f1117;
+}
+
 /* Badges */
 .badge-buy {
   background: #064e3b;
